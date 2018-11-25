@@ -1,4 +1,4 @@
-== Example makefile ==
+## Example makefile
 
 <pre>
 #######################################################################
@@ -9,7 +9,7 @@ include make_utils/common_targets.mk
 </pre>
 
 
-== Example makefile.mk ==
+## Example makefile.mk
 
 <pre>
 #######################################################################
