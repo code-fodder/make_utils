@@ -11,6 +11,10 @@
 # -Wshadow               warns about local variables with the same name as globals
 # -Werror          NOTE: turns all warnings in to errors
 
+# Note: the warning unused-result may come into play in release builds. It means return value of a function
+#       has not been dealt with. We should fix these warnings, but just in case we need to we can suppress
+#       it with -Wno-unused-result
+
 # The most basic set of warnings that everything should support
 FLAGS_WARNINGS_BASE = \
 	-Wall \
