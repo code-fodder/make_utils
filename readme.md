@@ -1,13 +1,17 @@
-Example makefile:
+== Example makefile ==
+
+<pre>
 #######################################################################
 # Include the common makefiles:
 #   - Variables:     Sets up the variables with some default values
 include make_utils/common_targets.mk
 #######################################################################
+</pre>
 
 
+== Example makefile.mk ==
 
-Example makefile.mk:
+<pre>
 #######################################################################
 # Include the common makefiles:
 #   - Variables:     Sets up the variables with some default values
@@ -36,3 +40,4 @@ include make_utils/common_warnings.mk
 include make_utils/common_var_expansions.mk
 include make_utils/common_rules.mk
 #######################################################################
+</pre>
