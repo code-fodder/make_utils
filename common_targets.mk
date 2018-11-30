@@ -46,10 +46,11 @@ endif
 .PHONY: run_make
 run_make:
 	@for mkfile in $(makefile_list) ; do \
-		echo "$(CYAN)$$mkfile $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(NC)"; \
+		echo "$(COLOUR_MAK)$$mkfile $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" --no-print-directory; \
-		echo "$(CYAN)$$mkfile - finished$(NC)"; \
+		echo "$(COLOUR_MAK)$$mkfile - finished$(COLOUR_RST)"; \
 	done
+	@echo "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
 
 .PHONY: clean
 clean: MAKE_GOALS += clean
@@ -68,11 +69,16 @@ jenkins: run_make
 test: run_make
 
 
-# If you call print directly here - use the default target (x86Linux)
+# If you call print or print_<var> directly here - use the default target (x86Linux)
 .PHONY: print
 print: target_x86Linux
 print: MAKE_GOALS += print
 print: run_make
+# print_var - as above
+.PHONY: print_%
+print_%: target_x86Linux
+print_%: MAKE_GOALS += $(RULE_TARGET)
+print_%:  run_make
 
 ############### Build Modifiers ################
 

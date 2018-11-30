@@ -1,10 +1,5 @@
-#colours for aesthetics
-RED := \033[1;31m
-GREEN := \033[1;32m
-YELLOW := \033[1;33m
-BLUE := \033[1;34m
-CYAN := \033[1;36m
-NC := \033[m
+# Get the colours
+-include make_utils/common_colours.mk
 
 # Util functions to return the root makefile name and the current makefile name
 GET_THIS_MAKEFILE = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))

@@ -25,11 +25,11 @@ build: build_header $(DEP_MAKE_DIRS) $(OUTPUT_DIR)/$(OUTPUT_FILE)
 
 .PHONY: build_header
 build_header:
-	@echo "$(GREEN)Building: $(OUTPUT_DIR)/$(OUTPUT_FILE)$(NC) : $(YELLOW)$(DEP_MAKE_DIRS)$(NC)" \
+	@echo "$(COLOUR_ACT)building: $(OUTPUT_DIR)/$(OUTPUT_FILE)$(COLOUR_RST) : $(COLOUR_DEP)$(DEP_MAKE_DIRS)$(COLOUR_RST)" \
 
 ###### The target rule ######
 $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OUTPUT_DIRS) $(OBJECTS)
-	@echo "$(GREEN)Linking: $(RULE_TARGET)$(NC)"
+	@echo "$(COLOUR_ACT)linking: $(RULE_TARGET)$(COLOUR_RST)"
 	$(CC) $(LFLAGS) $(OBJECTS) -o $(OUTPUT_DIR)/$(OUTPUT_FILE) $(LIB_DEPS)
 	@echo build complete
 
@@ -37,24 +37,24 @@ $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OUTPUT_DIRS) $(OBJECTS)
 # Dependency makefile directories rule (builds projects in other directories)
 .PHONY: $(DEP_MAKE_DIRS)
 $(DEP_MAKE_DIRS):
-	@echo "$(YELLOW)Processing dependency: '$(RULE_TARGET)'$(NC)"
+	@echo "$(COLOUR_DEP)Processing dependency: '$(RULE_TARGET)'$(COLOUR_RST)"
 	@cd $(RULE_TARGET) && $(MAKE) target_$(TARGET) $(BUILD_TYPE) $(DEP_MAKE_GOAL)
-	@echo "$(CYAN)$(ROOT_MAKEFILE) $(MAKECMDGOALS) ...continued ($(TARGET) $(BUILD_TYPE))$(NC)"
+	@echo "$(COLOUR_MAK)$(ROOT_MAKEFILE) $(MAKECMDGOALS) ...continued ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"
 
 ###### Compile Rules ######
 # Compile .cpp files
 $(OBJECT_DIR)/%.o: %.cpp
-	@echo "$(GREEN)compiling $(RULE_DEPENDENCY)$(NC)"
+	@echo "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	@$(POSTCOMPILE)
 # Compile .cxx files
 $(OBJECT_DIR)/%.o: %.cxx
-	@echo "$(GREEN)compiling $(RULE_DEPENDENCY)$(NC)"
+	@echo "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	@$(POSTCOMPILE)
 # Compile .c files
 $(OBJECT_DIR)/%.o: %.c
-	@echo "$(GREEN)compiling $(RULE_DEPENDENCY)$(NC)"
+	@echo "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CC) $(FLAGS_C_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	@$(POSTCOMPILE)
 
@@ -71,7 +71,7 @@ $(DEP_DIR)/%.d: ;
 clean: DEP_MAKE_GOAL = clean
 clean: $(DEP_MAKE_DIRS)
 clean:
-	@echo "$(GREEN)cleaning target: $(TARGET) $(BUILD_TYPE)$(NC)"
+	@echo "$(COLOUR_ACT)cleaning: $(TARGET) $(BUILD_TYPE)$(COLOUR_RST)"
 	$(RM) $(CLEAN_ITEMS)
 
 # Cleanall - cleans output dirs from the root
@@ -79,7 +79,7 @@ clean:
 cleanall: DEP_MAKE_GOAL = cleanall
 cleanall: $(DEP_MAKE_DIRS)
 cleanall:
-	@echo "$(GREEN)cleaning all targets$(NC)"
+	@echo "$(COLOUR_ACT)cleaning: all targets$(COLOUR_RST)"
 	$(RM) $(CLEANALL_ITEMS)
 
 # Create output directories
@@ -88,17 +88,13 @@ create_dirs: $(OUTPUT_DIRS)
 $(OUTPUT_DIRS):
 	@$(MAKE_DIR) $(RULE_TARGET)
 
-# Print the variables
+# Print all the variables
 VARS := $(sort $(filter-out $(VARS_OLD) VARS_OLD,$(.VARIABLES)))
-.PHONY: print_start print
-print: print_start $(VARS)
-	@echo "------------------------------------------"
-print_start:
-	@echo "------------------------------------------"
-	@printf "%-30s " "Variable"
-	@echo "Value"
-	@echo "------------------------------------------"
+.PHONY: print
+print: $(VARS)
 $(VARS):
-	@printf "%-30s " $(RULE_TARGET)
-	@echo "$($(RULE_TARGET))"
+	@echo "$(COLOUR_ACT)$(RULE_TARGET):$(COLOUR_RST) $($(RULE_TARGET))"
 
+# Print specific variable
+print_%:
+	@echo "$(COLOUR_ACT)$*:$(COLOUR_RST) $($*)"
