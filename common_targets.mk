@@ -46,7 +46,7 @@ endif
 .PHONY: run_make
 run_make:
 	@for mkfile in $(makefile_list) ; do \
-		echo "$(CYAN)$$mkfile $(ALL_PARAMS) ($(CYAN)$(TARGET) $(BUILD_TYPE))$(NC)"; \
+		echo "$(CYAN)$$mkfile $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(NC)"; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" --no-print-directory; \
 		echo "$(CYAN)$$mkfile - finished$(NC)"; \
 	done

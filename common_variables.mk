@@ -33,8 +33,12 @@ PATH ?=
 FLAGS_TARGET ?=
 # Other build variables
 CFLAGS = $(FLAGS_TARGET)
+CXXFLAGS = $(FLAGS_TARGET)
 LFLAGS = $(FLAGS_TARGET)
 DEFINES =
+
+### C/C++ standards ###
+CXX_STD = -std=c++11
 
 ### Commands ###
 MAKE_DIR = mkdir -p

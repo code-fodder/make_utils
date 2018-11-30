@@ -42,17 +42,15 @@ $(DEP_MAKE_DIRS):
 	@echo "$(CYAN)$(ROOT_MAKEFILE) $(MAKECMDGOALS) ...continued ($(TARGET) $(BUILD_TYPE))$(NC)"
 
 ###### Compile Rules ######
-# Add the include paths
-CFLAGS += $(INC_PATHS)
 # Compile .cpp files
 $(OBJECT_DIR)/%.o: %.cpp
 	@echo "$(GREEN)compiling $(RULE_DEPENDENCY)$(NC)"
-	$(CXX) $(FLAGS_CPP_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
+	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	@$(POSTCOMPILE)
 # Compile .cxx files
 $(OBJECT_DIR)/%.o: %.cxx
 	@echo "$(GREEN)compiling $(RULE_DEPENDENCY)$(NC)"
-	$(CXX) $(FLAGS_CPP_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
+	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	@$(POSTCOMPILE)
 # Compile .c files
 $(OBJECT_DIR)/%.o: %.c

@@ -13,6 +13,10 @@ OBJECTS = $(addprefix $(OBJECT_DIR)/,$(addsuffix .o,$(basename $(patsubst %,%,$(
 # Generate dependency files list. The compiler creates these (-MMD flag) same as obj file with a .d extension
 DEPS = $(subst $(OBJECT_DIR),$(DEP_DIR),$(OBJECTS:%.o=%.d))
 
+# Comiler flags
+CFLAGS += $(INC_PATHS)
+CXXFLAGS += $(INC_PATHS) $(CXX_STD)
+
 # Generate the output directories list (used for creating/cleaning output dirs
 OUTPUT_DIRS = \
 	$(OUTPUT_DIR) \
