@@ -18,21 +18,22 @@ OUTPUT_DIRS = $(OUTPUT_DIR) $(OBJECT_DIR) $(addprefix $(OBJECT_DIR)/,$(SOURCE_DI
 
 # Expand LIB_DEPS:
 # This is the list of include paths that the linker would need (paths to libs)
-LIB_DEP_INCS = $(dir $(subst .so,_$(TARGET)_$(BUILD_TYPE).so,$(LIB_DEPS)))
+LIB_DEP_INCS = $(dir $(subst .so,_$(TARGET)$(BUILD_SUFFIX).so,$(LIB_DEPS)))
+# This is the list of library names for the linker to link to
+LIB_DEP_LIBS_TEMP := $(basename $(notdir $(LIB_DEPS)))
+LIB_DEP_LIBS = $(addsuffix _$(TARGET)$(BUILD_SUFFIX),$(LIB_DEP_LIBS_TEMP:lib%=%))
+
 # This is the project directories (where the makefile live) so that we can call make in it
 LIB_DEP_PROJECT_DIRS = $(subst lib/,,$(LIB_DEP_INCS))
 # This is the specific target file (full path and name). We only get tge 
-LIB_DEP_TARGETS = $(subst .so,_$(TARGET)_$(BUILD_TYPE).so,$(LIB_DEPS))
-# DEBUG
-#$(info LIB_DEPS: $(LIB_DEPS))
-#$(info LIB_DEP_INCS: $(LIB_DEP_INCS))
-#$(info LIB_DEP_PROJECT_DIRS: $(LIB_DEP_PROJECT_DIRS))
-#$(info LIB_DEP_TARGETS: $(LIB_DEP_TARGETS))
+LIB_DEP_TARGETS = $(subst .so,_$(TARGET)$(BUILD_SUFFIX).so,$(LIB_DEPS))
+# Expand the lib link command line
+LIB_DEP_LINK_LINE = -L$(LIB_DIR) $(addprefix -L,$(LIB_DEP_INCS)) $(addprefix -l,$(LIB_DEP_LIBS)) $(STANDARD_LIBS)
 
 # Clean items will clean all the items for one specific target - e.g. running "make target_x64Linux release clean" will just clean the file for 
 # the x86Linux release build
-CLEAN_ITEMS = $(BIN_DIR)/*$(TARGET)_$(BUILD_TYPE)* \
-              $(LIB_DIR)/*$(TARGET)_$(BUILD_TYPE)* \
+CLEAN_ITEMS = $(BIN_DIR)/*$(TARGET)$(BUILD_SUFFIX)* \
+              $(LIB_DIR)/*$(TARGET)$(BUILD_SUFFIX)* \
               $(OBJECT_DIR) \
 			  $(addprefix $(OBJECT_DIR)/,$(SOURCE_DIRS)) \
 			  $(DEP_DIR) \
@@ -45,3 +46,6 @@ CLEAN_ITEMS = $(BIN_DIR)/*$(TARGET)_$(BUILD_TYPE)* \
 # sort              : removes duplicates (and... sorts).
 CLEANALL_ITEMS = $(sort $(foreach p,$(CLEAN_ITEMS),$(firstword $(subst /, ,$(p)))))
 #CLEANALL_ITEMS = obj dep bin lib
+
+GET_THIS_MAKEFILE = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+GET_ROOT_MAKEFILE = $(firstword $(MAKEFILE_LIST))

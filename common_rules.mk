@@ -1,11 +1,14 @@
+THIS_MAKEFILE := $(call GET_THIS_MAKEFILE)
+ROOT_MAKEFILE := $(call GET_ROOT_MAKEFILE)
+
 # -MMD is a compiler flag which tells the compiler to generate the dependacy lists for each object.
 #CFLAGS += -MMD
 # Add the include paths
 CFLAGS += $(INC_PATHS) $(FLAGS_STD)
-# include the auto generated dependecies targets
--include $(DEPS)
 
-#auto-dependency generation (part 1)
+# COMPILE DEPENDENCIES (part 1)
+# include the auto generated dependecies targets (if they exist)
+-include $(DEPS)
 #see: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
 #GCC flags to create the temporary .Td dependency file containing all header files
 #that the object depends on and empty targets for each one so that if the
@@ -16,7 +19,11 @@ DEP_FLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.Td
 #won't corrupt the dependency file. Touch the object, to correct its date
 POSTCOMPILE = @mv -f $(DEP_DIR)/$*.Td $(DEP_DIR)/$*.d && touch $@
 
-# build
+# Set the default goal to build.
+.DEFAULT_GOAL = build
+$(info BUILD GOALS: $(MAKECMDGOALS))
+
+# build - builds the depenedcy projects and then the target output file itself
 .PHONY: build
 build: LIB_DEP_DIR_GOAL = build
 build: build_header $(LIB_DEP_PROJECT_DIRS) $(OUTPUT_DIR)/$(OUTPUT_FILE)
@@ -25,11 +32,10 @@ build: build_header $(LIB_DEP_PROJECT_DIRS) $(OUTPUT_DIR)/$(OUTPUT_FILE)
 build_header:
 	@echo "$(GREEN)Building: $(OUTPUT_DIR)/$(OUTPUT_FILE)$(NC) : $(YELLOW)$(LIB_DEP_PROJECT_DIRS)$(NC)" \
 
-# The target build
-#$(OUTPUT_DIR)/$(OUTPUT_FILE): $(LIB_DEP_TARGETS) $(OUTPUT_DIRS) $(OBJECTS)
+# *** The build target output file ***
 $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OUTPUT_DIRS) $(OBJECTS)
 	@echo "$(GREEN)Linking: $@$(NC)"
-	$(CC) $(LFLAGS) $(OBJECTS) -o $(OUTPUT_DIR)/$(OUTPUT_FILE)
+	$(CC) $(LFLAGS) $(OBJECTS) -o $(OUTPUT_DIR)/$(OUTPUT_FILE) $(LIB_DEP_LINK_LINE)
 	@echo build complete
 
 # Specific rules to run on the library dependency directorys
@@ -37,15 +43,7 @@ $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OUTPUT_DIRS) $(OBJECTS)
 $(LIB_DEP_PROJECT_DIRS):
 	@echo "$(YELLOW)Processing dependency: '$@'$(NC)"
 	@cd $@ && $(MAKE) target_$(TARGET) $(BUILD_TYPE) $(LIB_DEP_DIR_GOAL)
-	@echo "$(CYAN)$(CURDIR) - make $(MAKECMDGOALS) ($(TARGET) $(BUILD_TYPE))$(NC)"
-
-# DEP2 ideas
-# pattern rule?  - Works, but how do we get the $(LIB_DEP_INCS) part into the rule?
-#$(LIB_DEP_INCS)%: 
-#	@echo "$(GREEN)building dependency: $@$(NC)"
-$(LIB_DEP_TARGETS):
-	@echo "$(YELLOW)Processing dependency: '$@'$(NC)"
-	@cd $(subst lib/,./,$(dir $@)) && $(MAKE) target_$(TARGET) $(BUILD_TYPE) build
+	@echo "$(CYAN)$(ROOT_MAKEFILE) $(MAKECMDGOALS) ...continued ($(TARGET) $(BUILD_TYPE))$(NC)"
 
 # Compile .cpp files
 $(OBJECT_DIR)/%.o: %.cpp
@@ -63,20 +61,13 @@ $(OBJECT_DIR)/%.o: %.c
 	$(CC) $(FLAGS_C_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	@$(POSTCOMPILE)
 
-#auto-dependency generation (part 2)
+# COMPILE DEPENDENCIES (part 2)
 #Blank dependency target in case dependency file doesn't exist to allow
 #compile rule to run as usual and create a dependency file
 $(DEP_DIR)/%.d: ;
 #Mark the dependency files as precious to Make so they won't be automatically
 #deleted as intermediate files
 .PRECIOUS: $(DEP_DIR)/%.d
-#Include the dependency files
-include $(wildcard $(DEP_DIR)/*.d)
-
-#.PHONY: project_deps $(PROJECT_DEPS)
-#project_deps: $(PROJECT_DEPS)
-#$(PROJECT_DEPS):
-#	$(MAKE) $(MAKECMDGOALS) -C $(RULE_TARGET)
 
 # Clean - does a target clean and also cleans the depenencies
 .PHONY: clean
@@ -84,7 +75,6 @@ clean: LIB_DEP_DIR_GOAL = clean
 clean: $(LIB_DEP_PROJECT_DIRS)
 clean:
 	@echo "$(GREEN)cleaning target: $(TARGET) $(BUILD_TYPE)$(NC)"
-#	@echo "$(GREEN)$(RM) $(CLEAN_ITEMS)$(NC)"
 	$(RM) $(CLEAN_ITEMS)
 
 # Cleanall - cleans output dirs from the root
@@ -93,7 +83,6 @@ cleanall: LIB_DEP_DIR_GOAL = cleanall
 cleanall: $(LIB_DEP_PROJECT_DIRS)
 cleanall:
 	@echo "$(GREEN)cleaning all targets$(NC)"
-#	@echo "$(GREEN)$(RM) $(CLEANALL_ITEMS)$(NC)"
 	$(RM) $(CLEANALL_ITEMS)
 
 # Create output directories

@@ -13,7 +13,7 @@ NC := \033[m
 # this copy before we set any variables so that we can filter those variables 
 # out later and just print the new variables we have set.
 VARS_OLD := $(.VARIABLES)
-VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS,$(VARS_OLD))
+VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS BUILD_SUFFIX,$(VARS_OLD))
 
 # Just for me so I can read my own makefile :o
 RULE_TARGET = $@
@@ -25,8 +25,8 @@ BUILD_TYPE ?=
 CC ?=
 CXX ?=
 RANLIB ?=
-AR ?= 
-PATH ?= 
+AR ?=
+PATH ?=
 FLAGS_TARGET ?=
 # Other build variables
 CFLAGS = $(FLAGS_TARGET)
@@ -35,9 +35,11 @@ DEFINES =
 
 # Resolve lib deps into the correct library names
 LIB_DEPS ?=
-LIB_DEP_INCS = 
+LIB_DEP_INCS =
+LIB_DEP_LIBS =
 LIB_DEP_PROJECT_DIRS =
-LIB_DEP_TARGETS = 
+LIB_DEP_TARGETS =
+STANDARD_LIBS = -lstdc++ -lpthread -lrt
 # These are dependencies on other makefile projects (for example testers or such)
 PROJECT_DEPS =
 
@@ -58,13 +60,13 @@ OBJECT_DIR = obj/$(TARGET)_$(BUILD_TYPE)
 OBJECTS =
 DEP_DIR = dep/$(TARGET)_$(BUILD_TYPE)
 DEPS =
-BIN_DIR = bin/$(TARGET)_$(BUILD_TYPE)
+BIN_DIR = bin
 LIB_DIR = lib
 OUTPUT_DIR = $(BIN_DIR)
 # Note this must be set in the makefile.mk
 OUTPUT_FILE = $(PROJECT_NAME)
 CLEAN_ITEMS =
-CLEANALL_ITEMS = 
+CLEANALL_ITEMS =
 
 # Warnings
 FLAGS_C_WARNINGS =

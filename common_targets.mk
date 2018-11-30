@@ -6,18 +6,19 @@ ALL_PARAMS := $(wordlist 1,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 #$(info SECONDARY_PARAMS = $(SECONDARY_PARAMS))
 # Filter out the non-targets - these are special build modifiers
-EXTRA_MAKE_GOALS := $(filter-out debug release,$(SECONDARY_PARAMS))
+EXTRA_MAKE_GOALS := $(filter-out debug release test,$(SECONDARY_PARAMS))
 #$(info EXTRA_MAKE_GOALS = $(EXTRA_MAKE_GOALS))
 #$(info DEPS_LIST = $(DEPS_LIST))
 
 # defaults
-TARGET = x86Linux
-BUILD_TYPE = debug
-CC = g++
-CXX = g++
-RANLIB = ranlib
-AR = ar
-FLAGS_TARGET = -m32
+export TARGET = x86Linux
+export BUILD_TYPE = debug
+export CC = g++
+export CXX = g++
+export RANLIB = ranlib
+export AR = ar
+export FLAGS_TARGET = -m32
+export BUILD_SUFFIX = d
 
 # Turn the other arguments into do-nothing targets for this makefile and pass them on to makefile.mk
 # This means that if we do something like "make target_iMX8EVK print", then we setup the target varibles
@@ -29,36 +30,26 @@ $(eval $(SECONDARY_PARAMS):;@:)
 # Now check if the secondary parameters contains release, otherwise its a debug build
 ifneq (,$(findstring release,$(ALL_PARAMS)))
   BUILD_TYPE = release
+  BUILD_SUFFIX =
 endif
 
 # Set the default target if not already set - this allows the makefile to overule it
 .DEFAULT_GOAL := target_x86Linux
 
+# The makefiles that we might find in a repo...
+makefile_list =  $(wildcard $(CURDIR)/makefile.mk)
+# Add make test if wanted
+ifneq (,$(findstring test,$(ALL_PARAMS)))
+  makefile_list += $(wildcard $(CURDIR)/makefile_test.mk)
+endif
+
 .PHONY: run_make
 run_make:
-	@echo "$(CYAN)$(CURDIR) - make $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(NC)"
-#	@echo "TARGET = $(TARGET)"
-#	@echo "BUILD_TYPE = $(BUILD_TYPE)"
-#	@echo "CC = $(CC)"
-#	@echo "CXX = $(CXX)"
-#	@echo "RANLIB = $(RANLIB)"
-#	@echo "AR = $(AR)"
-#	@echo "PATH = $(PATH)"
-#	@echo "FLAGS_TARGET = $(FLAGS_TARGET)"
-#	@echo "MAKE_GOALS = $(MAKE_GOALS)"
-#	@echo "EXTRA_MAKE_GOALS = $(EXTRA_MAKE_GOALS)"
-#	@echo "$(MAKE) -f makefile.mk ${MAKE_GOALS} $(EXTRA_MAKE_GOALS)"
-	@$(MAKE) -f makefile.mk ${MAKE_GOALS} $(EXTRA_MAKE_GOALS) \
-		TARGET="$(TARGET)" \
-		BUILD_TYPE="$(BUILD_TYPE)" \
-		CC="$(CC)" \
-		CXX="$(CXX)" \
-		RANLIB="$(RANLIB)" \
-		AR="$(AR)" \
-		PATH="$(PATH)" \
-		FLAGS_TARGET="$(FLAGS_TARGET)" \
-		--no-print-directory
-	@echo "$(CYAN)$(CURDIR) - finished$(NC)"
+	@for mkfile in $(makefile_list) ; do \
+		echo "$(CYAN)$$mkfile $(ALL_PARAMS) ($(CYAN)$(TARGET) $(BUILD_TYPE))$(NC)"; \
+		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" --no-print-directory; \
+		echo "$(CYAN)$$mkfile - finished$(NC)"; \
+	done
 
 .PHONY: clean
 clean: MAKE_GOALS += clean
@@ -72,40 +63,18 @@ cleanall: run_make
 jenkins: MAKE_GOALS += jenkins
 jenkins: run_make
 
+# Call test without any parameters - use defaults
+.PHONY: test
+test: run_make
+
+
 # If you call print directly here - use the default target (x86Linux)
 .PHONY: print
 print: target_x86Linux
 print: MAKE_GOALS += print
 print: run_make
 
-## Since the default goal is build I don't think we really need these...
-#.PHONY: build_x86Linux
-#build_x86Linux: target_x86Linux
-#build_x86Linux: MAKE_GOALS += build
-#build_x86Linux: run_make
-#
-#.PHONY: build_x64Linux
-#build_x64Linux: target_x64Linux
-#build_x64Linux: MAKE_GOALS += build
-#build_x64Linux: run_make
-#
-#.PHONY: build_iMX8EVK
-#build_iMX8EVK: target_iMX8EVK
-#build_iMX8EVK: MAKE_GOALS += build
-#build_iMX8EVK: run_make
-#
-#.PHONY: build_6GHzRx
-#build_6GHzRx: target_6GHzRx
-#build_6GHzRx: MAKE_GOALS += build
-#build_6GHzRx: run_make
-#
-#.PHONY: build_6GHzTx
-#build_6GHzTx: target_6GHzTx
-#build_6GHzTx: MAKE_GOALS += build
-#build_6GHzTx: run_make
-
-
-############### Build Modifier ################
+############### Build Modifiers ################
 
 # IMPORTANT NOTE
 # These are meant to be called as secondary build goals since they only modify the 
