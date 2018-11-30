@@ -65,13 +65,16 @@ FLAGS_WARNINGS_DISABLED   = -w
 ########################################################
 ifneq (,$(findstring false,$(FLAGS_THIRD_PARTY)))
 	ifneq (,$(findstring Linux,$(TARGET)))
+        $(info WARNING LEVEL: Host)
 		FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_HOST)
 		FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_C_HOST)
 	else
+        $(info WARNING LEVEL: Target)
 		FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_TARGET)
 		FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_C_TARGET)
 	endif
 else
+    $(info WARNING LEVEL: Disabled)
 	FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_DISABLED)
 	FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_DISABLED)
 endif
