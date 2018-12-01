@@ -46,6 +46,8 @@ SOURCE_DIRS = .
 SOURCES =
 # Paths where required headers files are found
 INC_DIRS = .
+# Paths of header files from other projects that we dont want warnings for (-isystem instead of -I)
+SYS_INC_DIRS =
 # Header files (not sure if this will be used/needed for anything - useful for printing/debugging)
 HEADERS =
 # List of paths to include (-I<path>) used by the compiler

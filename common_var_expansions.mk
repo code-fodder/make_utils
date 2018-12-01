@@ -2,10 +2,14 @@
 SOURCES = $(foreach dir,$(SOURCE_DIRS),$(wildcard $(dir)/*.cpp $(dir)/*.cxx $(dir)/*.c))
 
 # Generate headers list for hpp, hxx and h files
-HEADERS = $(foreach dir,$(INC_DIRS),$(wildcard $(dir)/*.hpp $(dir)/*.hxx $(dir)/*.h $(dir)/*.hh))
+HEADERS = \
+	$(foreach dir,$(INC_DIRS),$(wildcard $(dir)/*.hpp $(dir)/*.hxx $(dir)/*.h $(dir)/*.hh)) \
+	$(foreach dir,$(SYS_INC_DIRS),$(wildcard $(dir)/*.hpp $(dir)/*.hxx $(dir)/*.h $(dir)/*.hh)) \
 
 # Generate includ dirs list
-INC_PATHS = $(addprefix -I,$(INC_DIRS)) 
+INC_PATHS = \
+	$(addprefix -I,$(INC_DIRS)) \
+	$(addprefix -isystem,$(SYS_INC_DIRS)) \
 
 # Generate objects list from the sources list prefixed with the object dir
 OBJECTS = $(addprefix $(OBJECT_DIR)/,$(addsuffix .o,$(basename $(patsubst %,%,$(SOURCES)))))

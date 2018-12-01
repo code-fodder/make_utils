@@ -46,17 +46,17 @@ $(DEP_MAKE_DIRS):
 $(OBJECT_DIR)/%.o: %.cpp
 	@echo "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
-	@$(POSTCOMPILE)
+	-@$(POSTCOMPILE)
 # Compile .cxx files
 $(OBJECT_DIR)/%.o: %.cxx
 	@echo "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
-	@$(POSTCOMPILE)
+	-@$(POSTCOMPILE)
 # Compile .c files
 $(OBJECT_DIR)/%.o: %.c
 	@echo "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CC) $(FLAGS_C_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
-	@$(POSTCOMPILE)
+	-@$(POSTCOMPILE)
 
 ###### Object dependencies (part 2) ######
 #Blank dependency target in case dependency file doesn't exist to allow
@@ -96,5 +96,6 @@ $(VARS):
 	@echo "$(COLOUR_ACT)$(RULE_TARGET):$(COLOUR_RST) $($(RULE_TARGET))"
 
 # Print specific variable
+.PHONY: print_%
 print_%:
 	@echo "$(COLOUR_ACT)$*:$(COLOUR_RST) $($*)"

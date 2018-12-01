@@ -48,7 +48,13 @@ run_make:
 	@for mkfile in $(makefile_list) ; do \
 		echo "$(COLOUR_MAK)$$mkfile $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" --no-print-directory; \
-		echo "$(COLOUR_MAK)$$mkfile - finished$(COLOUR_RST)"; \
+		if [ $$? -ne 0 ] ; then \
+			echo "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
+			exit 1; \
+		else \
+			echo "$(COLOUR_MAK)$$mkfile - finished $(COLOUR_RST)"; \
+			exit 0; \
+		fi; \
 	done
 	@echo "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
 
@@ -68,16 +74,16 @@ jenkins: run_make
 .PHONY: test
 test: run_make
 
-
 # If you call print or print_<var> directly here - use the default target (x86Linux)
 .PHONY: print
 print: target_x86Linux
 print: MAKE_GOALS += print
 print: run_make
-# print_var - as above
+
+# print_var - as above, but does not seem to work at the moment... it did once ?!?
 .PHONY: print_%
 print_%: target_x86Linux
-print_%: MAKE_GOALS += $(RULE_TARGET)
+print_%: MAKE_GOALS += $@
 print_%:  run_make
 
 ############### Build Modifiers ################
