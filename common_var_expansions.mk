@@ -36,7 +36,7 @@ LIB_DEPS = \
 	$(STANDARD_LIBS)
 
 #This can be useful - its just here so it can be copy/pasted
-LD_LIBRARY_PATH_CMD = export LD_LIBRARY_PATH=$(subst $(eval) ,:,$(addprefix ../,$(LIB_DEP_PATHS)))
+LD_LIBRARY_PATH_PRINT = export LD_LIBRARY_PATH=$(subst $(eval) ,:,$(realpath $(LIB_DEP_PATHS)))
 
 # Clean items will clean all the items for one specific target - e.g. running "make target_x64Linux release clean" will just clean the file for 
 # the x86Linux release build

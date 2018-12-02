@@ -26,7 +26,6 @@ build: DEP_MAKE_GOAL = build
 build: build_header $(OUTPUT_DIRS) $(OBJECTS) $(DEP_MAKE_DIRS)
 build:
 	@$(MAKE) -f make_utils/linker.mk $(OUTPUT_DIR)/$(OUTPUT_FILE) $(SILENT_MAKE)
-	@echo $(LD_LIBRARY_PATH_CMD)
 
 .PHONY: build_header
 build_header:

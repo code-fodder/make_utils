@@ -12,7 +12,7 @@ VARS_OLD := $(.VARIABLES)
 VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS BUILD_SUFFIX,$(VARS_OLD))
 
 #This can be useful - its just here so it can be copy/pasted
-LD_LIBRARY_PATH_CMD =
+LD_LIBRARY_PATH_PRINT = 
 
 # This is really just a reminder. Can use these variables as required.
 # Rule format is  "$@: $<"
