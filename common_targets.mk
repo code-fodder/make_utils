@@ -62,7 +62,6 @@ run_make:
 			exit 1; \
 		else \
 			echo "$(COLOUR_MAK)$$mkfile - finished $(COLOUR_RST)"; \
-			exit 0; \
 		fi; \
 	done
 	@echo "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
