@@ -64,7 +64,7 @@ DEP_MAKE_DIRS =
 # This is the make goal to pass to the dependency make project dir
 DEP_MAKE_GOAL =
 # Libs deps contains the library linker-command options (-Lpaths and -llib names)
-LIB_DEPS ?=
+LIB_DEPS =
 # These are the required libraries that need linking
 LIB_DEP_LIBS =
 # The common standard libraries

@@ -20,7 +20,7 @@ POSTCOMPILE = @mv -f $(DEP_DIR)/$*.Td $(DEP_DIR)/$*.d && touch $(RULE_TARGET)
 
 # build - builds the depenedcy projects and then the target output file itself.
 # Note we need to export the variables that are needed for the linker make
-export OUTPUT_DIR OUTPUT_FILE CC LFLAGS OBJECTS LIB_DEPS
+export OUTPUT_DIR OUTPUT_FILE CC CXX LFLAGS OBJECTS LIB_DEPS
 .PHONY: build
 build: DEP_MAKE_GOAL = build
 build: build_header $(OUTPUT_DIRS) $(OBJECTS) $(DEP_MAKE_DIRS)
