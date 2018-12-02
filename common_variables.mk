@@ -2,7 +2,8 @@
 -include make_utils/common_colours.mk
 
 # Util functions to return the root makefile name and the current makefile name
-GET_THIS_MAKEFILE = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+#GET_THIS_MAKEFILE = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+GET_THIS_MAKEFILE = $(CURDIR)/$(lastword $(MAKEFILE_LIST))
 GET_ROOT_MAKEFILE = $(firstword $(MAKEFILE_LIST))
 
 # For printing. This takes a copy of all the environment variables. We take
@@ -62,6 +63,11 @@ HEADERS =
 INC_PATHS =
 
 ### Dependencies ###
+# Lib dependencies - use mostly for checking if they have changed to determine if we need to run the link rule
+LIB_DEPS =
+# Lib flags for linking
+LIB_LINK_FLAGS =
+
 # These are folders which contain makefile that this project depends on building first
 DEP_MAKE_DIRS =
 # This is the make goal to pass to the dependency make project dir

@@ -29,14 +29,15 @@ OUTPUT_DIRS = \
 	$(DEP_DIR) \
 	$(addprefix $(DEP_DIR)/,$(SOURCE_DIRS))
 
-# Create the library depenendies line for the linker (-L<path> and -l<lib>)
-LIB_DEPS = \
-	$(addprefix -L,$(LIB_DEP_PATHS)) \
-	$(addprefix -l,$(LIB_DEP_LIBS)) \
+# Create the library linker options for the linker (-L<path> and -l<lib>)
+LIBRARY_LINK_FILES_TMP = $(notdir $(LIB_DEPS))
+LIB_LINK_FLAGS = \
+	$(addprefix -L,$(dir $(LIB_DEPS))) \
+	$(addprefix -l,$(basename $(LIBRARY_LINK_FILES_TMP:lib%=%))) \
 	$(STANDARD_LIBS)
 
 #This can be useful - its just here so it can be copy/pasted
-LD_LIBRARY_PATH_PRINT = export LD_LIBRARY_PATH=$(subst $(eval) ,:,$(realpath $(LIB_DEP_PATHS)))
+LD_LIBRARY_PATH_PRINT = export LD_LIBRARY_PATH=$(subst $(eval) ,:,$(realpath $(dir $(LIB_DEPS))))
 
 # Clean items will clean all the items for one specific target - e.g. running "make target_x64Linux release clean" will just clean the file for 
 # the x86Linux release build
