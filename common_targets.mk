@@ -1,32 +1,35 @@
 include make_utils/common_colours.mk
 
+# Contains all the parameters
 ALL_PARAMS := $(wordlist 1,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 #$(info ALL_PARAMS = $(ALL_PARAMS))
+
 # Only take the first argument as local make goal
 SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 #$(info SECONDARY_PARAMS = $(SECONDARY_PARAMS))
+
 # Filter out the non-targets - these are special build modifiers
+# Sometimes the EXTRA_MAKE_GOALS will contain the build/clean target
+# depending on the order of the parameters
 EXTRA_MAKE_GOALS := $(filter-out debug release test verbose,$(SECONDARY_PARAMS))
-#$(info EXTRA_MAKE_GOALS = $(EXTRA_MAKE_GOALS))
-#$(info DEPS_LIST = $(DEPS_LIST))
 
-# defaults
-export TARGET = x86Linux
-export BUILD_TYPE = debug
-export CC = g++
-export CXX = g++
-export RANLIB = ranlib
-export AR = ar
-export FLAGS_TARGET = -m32
-export BUILD_SUFFIX = d
-export FLAG_VERBOSE = 
+# Export all variables that are setup here - saves individually exporting variables
+.EXPORT_ALL_VARIABLES:
+# defaults - Note: these parameters are exported so that they are passed down to the sub makefiles
+TARGET = x86Linux
+BUILD_TYPE = debug
+CC = g++
+CXX = g++
+RANLIB = ranlib
+AR = ar
+FLAGS_TARGET = -m32
+BUILD_SUFFIX = d
+FLAG_VERBOSE = 
 
-# Turn the other arguments into do-nothing targets for this makefile and pass them on to makefile.mk
+# Turn the secondary arguments into do-nothing targets for this makefile and pass them on to makefile.mk
 # This means that if we do something like "make target_iMX8EVK print", then we setup the target varibles
 # in a rule in this file, but we pass those variables on to the makefile.mk with the print goal - thus printing
 # out the variables for the iMX8EVK target and not just the default one.
-#$(eval $(EXTRA_MAKE_GOALS):;@:)
-# Turn any other secondary parameters
 $(eval $(SECONDARY_PARAMS):;@:)
 # Now check if the secondary parameters contains release, otherwise its a debug build
 ifneq (,$(findstring release,$(ALL_PARAMS)))
@@ -55,7 +58,7 @@ endif
 .PHONY: run_make
 run_make:
 	@for mkfile in $(makefile_list) ; do \
-		echo "$(COLOUR_MAK)$$mkfile $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
+		echo "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" $(SILENT_MAKE); \
 		if [ $$? -ne 0 ] ; then \
 			echo "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
@@ -88,11 +91,13 @@ print: target_x86Linux
 print: MAKE_GOALS += print
 print: run_make
 
-# print_var - as above, but does not seem to work at the moment... it did once ?!?
 .PHONY: print_%
-print_%: target_x86Linux
-print_%: MAKE_GOALS += $@
-print_%:  run_make
+print_%:
+	$(MAKE) -f makefile.mk $@ PATH="$(PATH)" $(SILENT_MAKE)
+
+.PHONY: get_ld_lib_path
+get_ld_lib_path: MAKE_GOALS += get_ld_lib_path
+get_ld_lib_path: run_make
 
 ############### Build Modifiers ################
 
