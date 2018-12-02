@@ -6,7 +6,7 @@ ALL_PARAMS := $(wordlist 1,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 #$(info SECONDARY_PARAMS = $(SECONDARY_PARAMS))
 # Filter out the non-targets - these are special build modifiers
-EXTRA_MAKE_GOALS := $(filter-out debug release test,$(SECONDARY_PARAMS))
+EXTRA_MAKE_GOALS := $(filter-out debug release test verbose,$(SECONDARY_PARAMS))
 #$(info EXTRA_MAKE_GOALS = $(EXTRA_MAKE_GOALS))
 #$(info DEPS_LIST = $(DEPS_LIST))
 
@@ -19,6 +19,7 @@ export RANLIB = ranlib
 export AR = ar
 export FLAGS_TARGET = -m32
 export BUILD_SUFFIX = d
+export FLAG_VERBOSE = 
 
 # Turn the other arguments into do-nothing targets for this makefile and pass them on to makefile.mk
 # This means that if we do something like "make target_iMX8EVK print", then we setup the target varibles
@@ -31,6 +32,14 @@ $(eval $(SECONDARY_PARAMS):;@:)
 ifneq (,$(findstring release,$(ALL_PARAMS)))
   BUILD_TYPE = release
   BUILD_SUFFIX =
+endif
+
+# If verbose is specified then turn off the silencing so the make lines can be seen (e.g. compile/linker lines
+# and other info)
+SILENT_MAKE = -s --no-print-directory
+ifneq (,$(findstring verbose,$(ALL_PARAMS)))
+  SILENT_MAKE =
+  FLAG_VERBOSE = verbose
 endif
 
 # Set the default target if not already set - this allows the makefile to overule it
@@ -47,7 +56,7 @@ endif
 run_make:
 	@for mkfile in $(makefile_list) ; do \
 		echo "$(COLOUR_MAK)$$mkfile $(ALL_PARAMS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
-		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" --no-print-directory; \
+		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" $(SILENT_MAKE); \
 		if [ $$? -ne 0 ] ; then \
 			echo "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
 			exit 1; \
@@ -90,7 +99,9 @@ print_%:  run_make
 
 # IMPORTANT NOTE
 # These are meant to be called as secondary build goals since they only modify the 
-# flags that are passed to the makefile.mk
+# flags that are passed to the makefile.mk. However if they are the first parameter
+# They become THE rule, so we add a rule here to do the default build, but also
+# it does the tab completion
 
 # Release build
 .PHONY: release
@@ -101,6 +112,10 @@ release: run_make
 .PHONY: debug
 debug: FLAGS_TARGET += -g
 debug: run_make
+
+# verbose 
+.PHONY: verbose
+verbose: run_make
 
 ################# The Targets #################
 

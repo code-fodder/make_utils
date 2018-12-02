@@ -16,6 +16,11 @@ VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS BUIL
 RULE_TARGET = $@
 RULE_DEPENDENCY = $<
 
+# The -s flag silences makes changing dir / nothing to be done, etc... info messages.
+# this can be overriddden with the verbose flag
+SILENT_MAKE ?= 
+FLAG_VERBOSE ?= 
+
 ### Build Configuation ###
 # Passed in build variables they are just here for reference really - they are already set.
 TARGET ?=

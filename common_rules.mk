@@ -16,30 +16,36 @@ POSTCOMPILE = @mv -f $(DEP_DIR)/$*.Td $(DEP_DIR)/$*.d && touch $(RULE_TARGET)
 
 # Set the default goal to build.
 .DEFAULT_GOAL = build
-$(info BUILD GOAL: $(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)))
+#$(info BUILD GOAL: $(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)))
 
-# build - builds the depenedcy projects and then the target output file itself
+# build - builds the depenedcy projects and then the target output file itself.
+# Note we need to export the variables that are needed for the linker make
+export OUTPUT_DIR OUTPUT_FILE CC LFLAGS OBJECTS LIB_DEPS
 .PHONY: build
 build: DEP_MAKE_GOAL = build
-build: build_header $(DEP_MAKE_DIRS) $(OUTPUT_DIR)/$(OUTPUT_FILE)
+build: build_header $(OUTPUT_DIRS) $(OBJECTS) $(DEP_MAKE_DIRS)
+build:
+	@$(MAKE) -f make_utils/linker.mk $(OUTPUT_DIR)/$(OUTPUT_FILE) $(SILENT_MAKE)
 
 .PHONY: build_header
 build_header:
-	@echo "$(COLOUR_ACT)building: $(OUTPUT_DIR)/$(OUTPUT_FILE)$(COLOUR_RST) : $(COLOUR_DEP)$(DEP_MAKE_DIRS)$(COLOUR_RST)" \
-
-###### The target rule ######
-$(OUTPUT_DIR)/$(OUTPUT_FILE): $(OUTPUT_DIRS) $(OBJECTS)
-	@echo "$(COLOUR_ACT)linking: $(RULE_TARGET)$(COLOUR_RST)"
-	$(CC) $(LFLAGS) $(OBJECTS) -o $(OUTPUT_DIR)/$(OUTPUT_FILE) $(LIB_DEPS)
-	@echo build complete
+	@echo "$(COLOUR_ACT)building: $(OUTPUT_DIR)/$(OUTPUT_FILE)$(COLOUR_RST) $(COLOUR_DEP)[$(DEP_MAKE_DIRS)]$(COLOUR_RST)"
 
 ###### External Dependency Rules ######
 # Dependency makefile directories rule (builds projects in other directories)
 .PHONY: $(DEP_MAKE_DIRS)
 $(DEP_MAKE_DIRS):
-	@echo "$(COLOUR_DEP)Processing dependency: '$(RULE_TARGET)'$(COLOUR_RST)"
-	@cd $(RULE_TARGET) && $(MAKE) target_$(TARGET) $(BUILD_TYPE) $(DEP_MAKE_GOAL)
+	@echo "$(COLOUR_DEP)processing dependency: '$(RULE_TARGET)'$(COLOUR_RST)"
+	@$(MAKE) -C $(RULE_TARGET) target_$(TARGET) $(BUILD_TYPE) $(DEP_MAKE_GOAL) $(FLAG_VERBOSE)
 	@echo "$(COLOUR_MAK)$(ROOT_MAKEFILE) $(MAKECMDGOALS) ...continued ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"
+
+# NOTE: This moved to linker.mk to gaurantee that it is the last thing that is called - from the build rule.
+###### The target rule ######
+#.NOT_PARALLEL: $(OUTPUT_DIR)/$(OUTPUT_FILE)
+#$(OUTPUT_DIR)/$(OUTPUT_FILE): $(OUTPUT_DIRS) $(OBJECTS)
+#	@echo "$(COLOUR_ACT)linking: $(RULE_TARGET)$(COLOUR_RST)"
+#	$(CC) $(LFLAGS) $(OBJECTS) -o $(OUTPUT_DIR)/$(OUTPUT_FILE) $(LIB_DEPS)
+#	@echo build complete
 
 ###### Compile Rules ######
 # Compile .cpp files
@@ -71,7 +77,7 @@ $(DEP_DIR)/%.d: ;
 clean: DEP_MAKE_GOAL = clean
 clean: $(DEP_MAKE_DIRS)
 clean:
-	@echo "$(COLOUR_ACT)cleaning: $(TARGET) $(BUILD_TYPE)$(COLOUR_RST)"
+	@echo "$(COLOUR_ACT)cleaning: $(TARGET) $(BUILD_TYPE)$(COLOUR_RST) $(COLOUR_DEP)[$(DEP_MAKE_DIRS)]$(COLOUR_RST)"
 	$(RM) $(CLEAN_ITEMS)
 
 # Cleanall - cleans output dirs from the root
@@ -79,7 +85,7 @@ clean:
 cleanall: DEP_MAKE_GOAL = cleanall
 cleanall: $(DEP_MAKE_DIRS)
 cleanall:
-	@echo "$(COLOUR_ACT)cleaning: all targets$(COLOUR_RST)"
+	@echo "$(COLOUR_ACT)cleaning: all targets$(COLOUR_RST) $(COLOUR_DEP)[$(DEP_MAKE_DIRS)]$(COLOUR_RST)"
 	$(RM) $(CLEANALL_ITEMS)
 
 # Create output directories
