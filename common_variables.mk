@@ -3,8 +3,9 @@
 
 # Util functions to return the root makefile name and the current makefile name
 #GET_THIS_MAKEFILE = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
-GET_THIS_MAKEFILE = $(CURDIR)/$(lastword $(MAKEFILE_LIST))
-GET_ROOT_MAKEFILE = $(firstword $(MAKEFILE_LIST))
+GET_THIS_MAKEFILE   = $(CURDIR)/$(lastword $(MAKEFILE_LIST))
+GET_ROOT_MAKEFILE   = $(firstword $(MAKEFILE_LIST))
+GET_CURDIR_BASENAME = $(shell basename $(CURDIR))
 
 # For printing. This takes a copy of all the environment variables. We take
 # this copy before we set any variables so that we can filter those variables 

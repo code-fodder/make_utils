@@ -11,10 +11,11 @@ SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 # Filter out the non-targets - these are special build modifiers
 # Sometimes the EXTRA_MAKE_GOALS will contain the build/clean target
 # depending on the order of the parameters
-EXTRA_MAKE_GOALS := $(filter-out debug release test verbose,$(SECONDARY_PARAMS))
+EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose,$(SECONDARY_PARAMS))
 
 # Export all variables that are setup here - saves individually exporting variables
 .EXPORT_ALL_VARIABLES:
+
 # defaults - Note: these parameters are exported so that they are passed down to the sub makefiles
 TARGET = x86Linux
 BUILD_TYPE = debug
@@ -37,11 +38,15 @@ ifneq (,$(findstring release,$(ALL_PARAMS)))
   BUILD_SUFFIX =
 endif
 
-# If verbose is specified then turn off the silencing so the make lines can be seen (e.g. compile/linker lines
-# and other info)
+# If verbose is specified then this just prints a little bit of extra debug info
+# If vverbose is specified then print all the compile/link commands as well. Note that 
+# --no-print-directory is still specified because it is deemed unuseful (we have other
+# debug that shows the precise makefile being called)
 SILENT_MAKE = -s --no-print-directory
-ifneq (,$(findstring verbose,$(ALL_PARAMS)))
-  SILENT_MAKE =
+ifneq (,$(findstring vverbose,$(ALL_PARAMS)))
+  SILENT_MAKE = --no-print-directory
+  FLAG_VERBOSE = vverbose
+else ifneq (,$(findstring verbose,$(ALL_PARAMS)))
   FLAG_VERBOSE = verbose
 endif
 
@@ -58,13 +63,17 @@ endif
 .PHONY: run_make
 run_make:
 	@for mkfile in $(makefile_list) ; do \
-		echo "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
+		if [ "$(FLAG_VERBOSE)" != "" ] ; then \
+			echo "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
+		fi; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" $(SILENT_MAKE); \
 		if [ $$? -ne 0 ] ; then \
 			echo "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
 			exit 1; \
 		else \
-			echo "$(COLOUR_MAK)$$mkfile - finished $(COLOUR_RST)"; \
+			if [ "$(FLAG_VERBOSE)" != "" ] ; then \
+				echo "$(COLOUR_MAK)$$mkfile - finished $(COLOUR_RST)"; \
+			fi; \
 		fi; \
 	done
 	@echo "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
@@ -120,6 +129,10 @@ debug: run_make
 # verbose 
 .PHONY: verbose
 verbose: run_make
+
+# very verbose  (vverbose)
+.PHONY: vverbose
+vverbose: run_make
 
 ################# The Targets #################
 
