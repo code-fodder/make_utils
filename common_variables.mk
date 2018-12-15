@@ -1,11 +1,5 @@
-# Get the colours
--include make_utils/common_colours.mk
-
-# Util functions to return the root makefile name and the current makefile name
-#GET_THIS_MAKEFILE = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
-GET_THIS_MAKEFILE   = $(CURDIR)/$(lastword $(MAKEFILE_LIST))
-GET_ROOT_MAKEFILE   = $(firstword $(MAKEFILE_LIST))
-GET_CURDIR_BASENAME = $(shell basename $(CURDIR))
+include make_utils/globals.mk
+include make_utils/common_colours.mk
 
 # For printing. This takes a copy of all the environment variables. We take
 # this copy before we set any variables so that we can filter those variables 
@@ -20,11 +14,7 @@ LD_LIBRARY_PATH_PRINT =
 # Rule format is  "$@: $<"
 RULE_TARGET = $@
 RULE_DEPENDENCY = $<
-
-# The -s flag silences makes changing dir / nothing to be done, etc... info messages.
-# this can be overriddden with the verbose flag
-SILENT_MAKE ?= 
-FLAG_VERBOSE ?= 
+RULE_DEPENDENCIES = $^
 
 ### Build Configuation ###
 # Passed in build variables they are just here for reference really - they are already set.
@@ -41,6 +31,15 @@ CFLAGS = $(FLAGS_TARGET)
 CXXFLAGS = $(FLAGS_TARGET)
 LFLAGS = $(FLAGS_TARGET)
 DEFINES =
+# The -s flag silences makes changing dir / nothing to be done, etc... info messages.
+# this can be overriddden with the verbose flag
+SILENT_MAKE ?=
+# Set to verbose or vverbose for more debug (or emtpy for normal level)
+FLAGS_VERBOSE ?=
+# Set to analyse if extra analysis is required
+FLAGS_ANALYSE ?=
+# Added extra flags to this variable to pass down to sub makfiles (like "verbose, analyse, etc...")
+FLAGS_SUB_MAKEFILE =
 
 ### C/C++ standards ###
 CXX_STD = -std=c++11
@@ -124,3 +123,17 @@ FLAGS_WARNINGS_DISABLED =
 
 # Third party flag - set to true if the project is 3rd party and then warnings and other checks will not be applied
 FLAGS_THIRD_PARTY = false
+
+### cppcheck ###
+# cppcheck command
+CPPCHECK = cppcheck
+# Flags to use with cppcheck
+CPPCHECK_FLAGS =  --enable=all --inconclusive --force
+# Suppress unwanted cppcheck messages
+CPPCHECK_SUPRESSIONS = --suppress=unmatchedSuppression --suppress=missingInclude --suppress=unusedFunction
+# The output format of the errors, other formats include: --template=vs, --xml-version=2
+CPPCHECK_FORMAT = --template=gcc
+# Filter to apply to cppcheck. If the object build compiled contains one or more string in this filter list
+# then it is not cppcheck'd
+CPPCHECK_FILTERS =
+

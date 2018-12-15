@@ -1,3 +1,4 @@
+include make_utils/globals.mk
 include make_utils/common_colours.mk
 
 # Contains all the parameters
@@ -11,7 +12,7 @@ SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 # Filter out the non-targets - these are special build modifiers
 # Sometimes the EXTRA_MAKE_GOALS will contain the build/clean target
 # depending on the order of the parameters
-EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose,$(SECONDARY_PARAMS))
+EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose analyse,$(SECONDARY_PARAMS))
 
 # Export all variables that are setup here - saves individually exporting variables
 .EXPORT_ALL_VARIABLES:
@@ -25,7 +26,8 @@ RANLIB = ranlib
 AR = ar
 FLAGS_TARGET = -m32
 BUILD_SUFFIX = d
-FLAG_VERBOSE = 
+FLAGS_VERBOSE =
+FLAGS_ANALYSE =
 
 # Turn the secondary arguments into do-nothing targets for this makefile and pass them on to makefile.mk
 # This means that if we do something like "make target_iMX8EVK print", then we setup the target varibles
@@ -45,9 +47,14 @@ endif
 SILENT_MAKE = -s --no-print-directory
 ifneq (,$(findstring vverbose,$(ALL_PARAMS)))
   SILENT_MAKE = --no-print-directory
-  FLAG_VERBOSE = vverbose
+  FLAGS_VERBOSE = vverbose
 else ifneq (,$(findstring verbose,$(ALL_PARAMS)))
-  FLAG_VERBOSE = verbose
+  FLAGS_VERBOSE = verbose
+endif
+
+# If analyse flag is specified then extra analysis tools are used (like cppcheck). Add more tools to the list as required
+ifneq (,$(findstring analyse,$(ALL_PARAMS)))
+  FLAGS_ANALYSE = analyse
 endif
 
 # Set the default target if not already set - this allows the makefile to overule it
@@ -63,20 +70,20 @@ endif
 .PHONY: run_make
 run_make:
 	@for mkfile in $(makefile_list) ; do \
-		if [ "$(FLAG_VERBOSE)" != "" ] ; then \
-			echo "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
+		if [[ "$(FLAGS_VERBOSE)" != "" ]] ; then \
+			$(ECHO) "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
 		fi; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" $(SILENT_MAKE); \
-		if [ $$? -ne 0 ] ; then \
-			echo "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
+		if [[ $$? -ne 0 ]] ; then \
+			$(ECHO) "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
 			exit 1; \
 		else \
-			if [ "$(FLAG_VERBOSE)" != "" ] ; then \
-				echo "$(COLOUR_MAK)$$mkfile - finished $(COLOUR_RST)"; \
+			if [[ "$(FLAGS_VERBOSE)" != "" ]] ; then \
+				$(ECHO) "$(COLOUR_MAK)$$mkfile - finished $(COLOUR_RST)" ; \
 			fi; \
 		fi; \
 	done
-	@echo "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
+	@$(ECHO) "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
 
 .PHONY: clean
 clean: MAKE_GOALS += clean
@@ -133,6 +140,10 @@ verbose: run_make
 # very verbose  (vverbose)
 .PHONY: vverbose
 vverbose: run_make
+
+# analyse 
+.PHONY: analyse
+analyse: run_make
 
 ################# The Targets #################
 
