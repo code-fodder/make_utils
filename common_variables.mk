@@ -7,8 +7,8 @@ include make_utils/common_colours.mk
 VARS_OLD := $(.VARIABLES)
 VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS BUILD_SUFFIX,$(VARS_OLD))
 
-#This can be useful - its just here so it can be copy/pasted
-LD_LIBRARY_PATH_PRINT = 
+# This can be useful for setting the LD LIBRARY PATH easily
+LD_LIBRARY_PATH_VAL = 
 
 # This is really just a reminder. Can use these variables as required.
 # Rule format is  "$@: $<"
@@ -83,7 +83,7 @@ STANDARD_LIBS = -lstdc++ -lpthread -lrt
 # The name of the generated executable/library is dependant on this
 PROJECT_NAME = out
 # Location where the object files are put
-OBJECT_DIR = obj/$(TARGET)_$(BUILD_TYPE)
+OBJECT_DIR = obj/$(TARGET)_$(BUILD_TYPE)$(GCOV_OBJ_DIR)
 # List of object files
 OBJECTS =
 # Location where the object deps (obj.d) files are put
@@ -136,4 +136,21 @@ CPPCHECK_FORMAT = --template=gcc
 # Filter to apply to cppcheck. If the object build compiled contains one or more string in this filter list
 # then it is not cppcheck'd
 CPPCHECK_FILTERS =
+# The paths for cppcheck to look in for headers (not to be set to any system paths)
+CPPCHECK_INC_PATHS =
+# Command line to call cppcheck on a single file
+CPPCHECK_CMD_LINE =
+# cpp check bash command line - this contains a micro-script to run ccpcheck. It is responsible to filter
+# out files that are not to be checked and prcesses the output.
+CPPCHECK_BASH_CMD =
+
+### gcov (code coverage) ###
+# gcovr command
+GCOVR = gcovr
+# gcov flags.
+GCOV_FLAGS =
+# Directory extension for using gcov (i.e. where the objects go)
+GCOV_OBJ_DIR =
+# GCOV filters (-e <path-to-source> excludes folders, -f <path-to-source> folders must match
+GCOV_FILTERS =
 

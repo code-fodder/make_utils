@@ -27,6 +27,7 @@ AR = ar
 FLAGS_TARGET = -m32
 BUILD_SUFFIX = d
 FLAGS_VERBOSE =
+FLAGS_SILENT =
 FLAGS_ANALYSE =
 
 # Turn the secondary arguments into do-nothing targets for this makefile and pass them on to makefile.mk
@@ -67,8 +68,9 @@ ifneq (,$(findstring test,$(ALL_PARAMS)))
   makefile_list += $(wildcard $(CURDIR)/makefile_test.mk)
 endif
 
-.PHONY: run_make
-run_make:
+### THE MAIN RULE ###
+.PHONY: _run_make
+_run_make:
 	@for mkfile in $(makefile_list) ; do \
 		if [[ "$(FLAGS_VERBOSE)" != "" ]] ; then \
 			$(ECHO) "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
@@ -83,37 +85,62 @@ run_make:
 			fi; \
 		fi; \
 	done
-	@$(ECHO) "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)"
+	@if [[ "$(FLAGS_SILENT)" != "true" ]] ; then $(ECHO) "$(COLOUR_AOK)$${PWD##*/} build succesfully completed$(COLOUR_RST)" ; fi ;
 
+# Clean everything for the specific target (inc sub-make dirs)
 .PHONY: clean
 clean: MAKE_GOALS += clean
-clean: run_make
+clean: _run_make
 
+# Clean everything for all targets (inc sub-make dirs)
 .PHONY: cleanall
 cleanall: MAKE_GOALS += cleanall
-cleanall: run_make
-
-.PHONY: jenkins
-jenkins: MAKE_GOALS += jenkins
-jenkins: run_make
+cleanall: _run_make
 
 # Call test without any parameters - use defaults
 .PHONY: test
-test: run_make
+test: _run_make
 
 # If you call print or print_<var> directly here - use the default target (x86Linux)
 .PHONY: print
 print: target_x86Linux
 print: MAKE_GOALS += print
-print: run_make
+print: _run_make
 
+# Print single variable
 .PHONY: print_%
 print_%:
-	$(MAKE) -f makefile.mk $@ PATH="$(PATH)" $(SILENT_MAKE)
+	@$(MAKE) -f makefile.mk $@ PATH="$(PATH)" $(SILENT_MAKE)
 
-.PHONY: get_ld_lib_path
-get_ld_lib_path: MAKE_GOALS += get_ld_lib_path
-get_ld_lib_path: run_make
+# print single variable with each item on new line
+.PHONY: printf_%
+printf_%:
+	@$(MAKE) -f makefile.mk $@ PATH="$(PATH)" $(SILENT_MAKE) | tr ' ' '\n'
+
+############### Stand-alone commands ################
+# These are meant to be run as stand-alone commands, for example if you want to set the LD_LIBRARY_PATH
+# You could do:
+#	> make set_ld_lib_path
+# However you can also use these functions with specific targets, so if you wanted to set the LD_LIBRARY_PATH
+# for x64Linux you would do:
+#	> make target_x64Linux set_ld_lib_path
+
+# Rule to set the ld library path
+ifneq (,$(findstring set_ld_lib_path,$(ALL_PARAMS)))
+  FLAGS_SILENT = true
+  MAKE_GOALS += set_ld_lib_path
+endif
+.PHONY: set_ld_lib_path
+set_ld_lib_path: _run_make
+
+# Rule to run the gcov command
+ifneq (,$(findstring run_gcov_cmd,$(ALL_PARAMS)))
+  FLAGS_SILENT = true
+  MAKE_GOALS += run_gcov_cmd
+  FLAGS_ANALYSE = analyse
+endif
+.PHONY: run_gcov_cmd
+run_gcov_cmd: _run_make
 
 ############### Build Modifiers ################
 
@@ -126,24 +153,24 @@ get_ld_lib_path: run_make
 # Release build
 .PHONY: release
 release: FLAGS_TARGET += -O2
-release: run_make
+release: _run_make
 
 # Debug build
 .PHONY: debug
 debug: FLAGS_TARGET += -g
-debug: run_make
+debug: _run_make
 
 # verbose 
 .PHONY: verbose
-verbose: run_make
+verbose: _run_make
 
 # very verbose  (vverbose)
 .PHONY: vverbose
-vverbose: run_make
+vverbose: _run_make
 
 # analyse 
 .PHONY: analyse
-analyse: run_make
+analyse: _run_make
 
 ################# The Targets #################
 
@@ -163,7 +190,7 @@ target_x86Linux: PATH := $(PATH)
 target_x86Linux: FLAGS_TARGET := -m32
 target_x86Linux: MAKE_GOALS += 
 target_x86Linux: $(BUILD_TYPE)
-target_x86Linux: run_make
+target_x86Linux: _run_make
 
 # Linux x64 c++ compiler
 .PHONY: target_x64Linux
@@ -176,7 +203,7 @@ target_x64Linux: PATH := $(PATH)
 target_x64Linux: FLAGS_TARGET := -m64
 target_x64Linux: MAKE_GOALS += 
 target_x64Linux: $(BUILD_TYPE)
-target_x64Linux: run_make
+target_x64Linux: _run_make
 
 ## target_iMX8EVK	: build the applications for the armv8 NXP i.MX8 EVK dev board
 .PHONY: target_iMX8EVK
@@ -189,7 +216,7 @@ target_iMX8EVK: PATH := /opt/fsl-imx-x11/4.9.51-mx8-beta/sysroots/x86_64-pokysdk
 target_iMX8EVK: FLAGS_TARGET := -march=armv8-a -mtune=cortex-a53 --sysroot=/opt/fsl-imx-x11/4.9.51-mx8-beta/sysroots/aarch64-poky-linux
 target_iMX8EVK: MAKE_GOALS += 
 target_iMX8EVK: $(BUILD_TYPE)
-target_iMX8EVK: run_make
+target_iMX8EVK: _run_make
 
 ## target_6GHzRx	: build the applications for the armv7 i.MX6 6GHzRx
 .PHONY: target_6GHzRx
@@ -202,7 +229,7 @@ target_6GHzRx: PATH := /opt/fsl-imx-x11/4.1.15-1.1.1/sysroots/x86_64-pokysdk-lin
 target_6GHzRx: FLAGS_TARGET := -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a9 --sysroot=/opt/fsl-imx-x11/4.1.15-1.1.1/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi
 target_6GHzRx: MAKE_GOALS += 
 target_6GHzRx: $(BUILD_TYPE)
-target_6GHzRx: run_make
+target_6GHzRx: _run_make
 
 ## target_6GHzTx	: build the applications for the armv7 i.MX6 6GHzTx
 .PHONY: target_6GHzTx
@@ -215,4 +242,4 @@ target_6GHzTx: PATH := /opt/trl-imx-6GTcvr/4.1.15-1.2.0/sysroots/x86_64-pokysdk-
 target_6GHzTx: FLAGS_TARGET := -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a9 --sysroot=/opt/trl-imx-6GTcvr/4.1.15-1.2.0/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi
 target_6GHzTx: MAKE_GOALS += 
 target_6GHzTx: $(BUILD_TYPE)
-target_6GHzTx: run_make
+target_6GHzTx: _run_make

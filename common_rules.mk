@@ -59,19 +59,19 @@ $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OBJECTS) $(LIB_DEPS)
 ###### Compile Rules ######
 # Compile .cpp files
 $(OBJECT_DIR)/%.o: %.cpp
-	$(CPPCHECK_CMD)
+	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)	
 	-@$(POSTCOMPILE)
 # Compile .cxx files
 $(OBJECT_DIR)/%.o: %.cxx
-	$(CPPCHECK_CMD)
+	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	-@$(POSTCOMPILE)
 # Compile .c files
 $(OBJECT_DIR)/%.o: %.c
-	$(CPPCHECK_CMD)
+	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CC) $(FLAGS_C_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	-@$(POSTCOMPILE)
@@ -120,7 +120,19 @@ $(VARS):
 print_%:
 	@$(ECHO) "$(COLOUR_ACT)$*:$(COLOUR_RST) $($*)"
 
-# print the LD_LIBRARY_PATH needed to find all dependant libs - for convinience
-.PHONY: get_ld_lib_path
-get_ld_lib_path:
-	@$(ECHO) "$(COLOUR_ACT)LD_LIBRARY_PATH_PRINT:$(COLOUR_RST) $(LD_LIBRARY_PATH_PRINT)"
+# Print with each item on new line
+.PHONY: printf_%
+printf_%:
+	@$(ECHO) "$(COLOUR_ACT)$*:$(COLOUR_RST) $($*)" | tr ' ' '\n'
+
+# Set the LD_LIBRARY_PATH needed to find all dependant libs - for convinience
+.PHONY: set_ld_lib_path
+set_ld_lib_path: export LD_LIBRARY_PATH = $(LD_LIBRARY_PATH_VAL)
+set_ld_lib_path:
+	@$(ECHO) "$(COLOUR_ACT)LD_LIBRARY_PATH:$(COLOUR_RST) $$LD_LIBRARY_PATH"
+
+# Run the gcov command
+.PHONY: run_gcov_cmd
+run_gcov_cmd:
+	@$(ECHO) $(GCOV_CMD)
+	$(GCOV_CMD)
