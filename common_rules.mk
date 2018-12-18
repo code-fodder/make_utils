@@ -27,6 +27,10 @@ build: DEP_MAKE_GOAL = build
 build: build_header $(OUTPUT_DIRS) $(DEP_MAKE_DIRS) $(OBJECTS)
 build:
 	@$(MAKE) -f make_utils/common_rules.mk $(OUTPUT_DIR)/$(OUTPUT_FILE) $(SILENT_MAKE)
+	@if [[ "$(POST_BUILD_TASKS)" != "" ]] ; then \
+		$(ECHO) "$(COLOUR_ACT)processing $(GET_CURDIR_BASENAME)$(GET_MAKE_SUFFIX) post build tasks$(COLOUR_RST)" ; \
+		$(POST_BUILD_TASKS) \
+	fi ;
 
 .PHONY: build_header
 build_header:

@@ -10,6 +10,15 @@ VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS BUIL
 # This can be useful for setting the LD LIBRARY PATH easily
 LD_LIBRARY_PATH_VAL = 
 
+# Post build tasks - this is meant to contain some simple bash instructions like copying files required
+# to run the application. Its not really intended for complicated scripts becuase:
+#    1. Its difficult to read
+#    2. Its difficult to debug.
+# However nothig is stopping you from using it that way. But it would be better to just create a script
+# called post_build_tasks.sh and call that.
+# Note each line must end with a semi-colon ';'.
+POST_BUILD_TASKS =
+
 # This is really just a reminder. Can use these variables as required.
 # Rule format is  "$@: $<"
 RULE_TARGET = $@
@@ -26,11 +35,6 @@ RANLIB ?=
 AR ?=
 PATH ?=
 FLAGS_TARGET ?=
-# Other build variables
-CFLAGS = $(FLAGS_TARGET)
-CXXFLAGS = $(FLAGS_TARGET)
-LFLAGS = $(FLAGS_TARGET)
-DEFINES =
 # The -s flag silences makes changing dir / nothing to be done, etc... info messages.
 # this can be overriddden with the verbose flag
 SILENT_MAKE ?=
@@ -40,6 +44,12 @@ FLAGS_VERBOSE ?=
 FLAGS_ANALYSE ?=
 # Added extra flags to this variable to pass down to sub makfiles (like "verbose, analyse, etc...")
 FLAGS_SUB_MAKEFILE =
+
+### Build flags
+CFLAGS = $(FLAGS_TARGET)
+CXXFLAGS = $(FLAGS_TARGET)
+LFLAGS = $(FLAGS_TARGET)
+DEFINES =
 
 ### C/C++ standards ###
 CXX_STD = -std=c++11
@@ -63,25 +73,22 @@ HEADERS =
 INC_PATHS =
 
 ### Dependencies ###
-# Lib dependencies - use mostly for checking if they have changed to determine if we need to run the link rule
-LIB_DEPS =
 # Lib flags for linking
 LIB_LINK_FLAGS =
-
 # These are folders which contain makefile that this project depends on building first
 DEP_MAKE_DIRS =
 # This is the make goal to pass to the dependency make project dir
 DEP_MAKE_GOAL =
 # Libs deps contains the library linker-command options (-Lpaths and -llib names)
 LIB_DEPS =
-# These are the required libraries that need linking
-LIB_DEP_LIBS =
 # The common standard libraries
 STANDARD_LIBS = -lstdc++ -lpthread -lrt
 
 ### Outputs ###
 # The name of the generated executable/library is dependant on this
 PROJECT_NAME = out
+# Full path of the project
+PROJET_DIR = $(CURDIR)
 # Location where the object files are put
 OBJECT_DIR = obj/$(TARGET)_$(BUILD_TYPE)$(GCOV_OBJ_DIR)
 # List of object files
@@ -143,6 +150,9 @@ CPPCHECK_CMD_LINE =
 # cpp check bash command line - this contains a micro-script to run ccpcheck. It is responsible to filter
 # out files that are not to be checked and prcesses the output.
 CPPCHECK_BASH_CMD =
+# Treat cppcheck issues as errors
+# @todo lets set this to true at some point, then there is no need jenkins xml output - just like compiler warnings.
+CPPCHECK_WERROR = false
 
 ### gcov (code coverage) ###
 # gcovr command
@@ -154,3 +164,8 @@ GCOV_OBJ_DIR =
 # GCOV filters (-e <path-to-source> excludes folders, -f <path-to-source> folders must match
 GCOV_FILTERS =
 
+### valgrind ###
+# Valgrind memcheck with just the xml output
+#VALGRIND_MEMCHK_CMD = valgrind --tool=memcheck --leak-check=full --xml=yes --xml-file=$(PROJET_DIR)/memcheck.xml
+# With logging recorded to file
+VALGRIND_MEMCHK_CMD = valgrind --tool=memcheck --leak-check=full --xml=yes --xml-file=$(PROJET_DIR)/memcheck.xml --verbose 2> $(PROJET_DIR)/memcheck.logging

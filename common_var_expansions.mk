@@ -47,7 +47,8 @@ CLEAN_ITEMS = $(BIN_DIR)/*$(TARGET)$(BUILD_SUFFIX)* \
 			  $(addprefix $(OBJECT_DIR)/,$(SOURCE_DIRS)) \
 			  $(DEP_DIR) \
 			  $(addprefix $(DEP_DIR)/,$(SOURCE_DIRS)) \
-			  *_cppcheck.xml
+			  coverage.xml \
+			  memcheck.xml memcheck.out
 
 # Derive this from the CLEAN_ITEMS by taking the base dir of each since we are going to remove the entire dir:
 # $(subst /, ,$(p)) : substitutes all / by space in the expansion of make variable p
@@ -97,9 +98,11 @@ ifneq (,$(findstring analyse,$(FLAGS_ANALYSE)))
 	if [[ "$$do_cpp_check" == "yes" ]] ; then \
 		$(ECHO) "$(COLOUR_ACT)ccpcheck: $(RULE_DEPENDENCY)$(COLOUR_RST)" ; \
 		cpp_res="$$($(CPPCHECK_CMD_LINE) 2>&1 > /dev/null)" ; \
+		cpp_err="false" ; \
 		while read -r err_line ; do \
-			if [[ "$$err_line" != "" ]] ; then $(ECHO) "$(COLOUR_ERR)$(CURDIR)/$$err_line$(COLOUR_RST)" ; fi ; \
+			if [[ "$$err_line" != "" ]] ; then $(ECHO) "$(COLOUR_ERR)$(CURDIR)/$$err_line$(COLOUR_RST)" ; cpp_err="true" ; fi ; \
 		done <<< $$cpp_res ; \
+		if [ "$$cpp_err" == "true" ] && [ "$(CPPCHECK_WERROR)" == "true" ] ; then exit 1 ; fi ; \
 	fi ;
 else
   CPPCHECK_BASH_CMD =
