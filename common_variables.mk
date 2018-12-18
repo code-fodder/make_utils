@@ -128,8 +128,8 @@ FLAGS_WARNINGS_C_HOST =
 FLAGS_WARNINGS_C_TARGET =
 FLAGS_WARNINGS_DISABLED =
 
-# Third party flag - set to true if the project is 3rd party and then warnings and other checks will not be applied
-FLAGS_THIRD_PARTY = false
+# Dont analyse flag - set to true if the project is 3rd party or test code so that warnings and other checks will not be applied
+FLAGS_DONT_ANALYSE = false
 
 ### cppcheck ###
 # cppcheck command
@@ -152,6 +152,8 @@ CPPCHECK_CMD_LINE =
 CPPCHECK_BASH_CMD =
 # Treat cppcheck issues as errors
 # @todo lets set this to true at some point, then there is no need jenkins xml output - just like compiler warnings.
+# For the moment in jenkins we can overule this with:
+#	make ... CPPCHECK_WERROR="true"
 CPPCHECK_WERROR = false
 
 ### gcov (code coverage) ###

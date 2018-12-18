@@ -63,7 +63,7 @@ FLAGS_WARNINGS_DISABLED   = -w
 ########################################################
 # Setup the warning level based on target              #
 ########################################################
-ifneq (,$(findstring false,$(FLAGS_THIRD_PARTY)))
+ifneq (,$(findstring false,$(FLAGS_DONT_ANALYSE)))
 	ifneq (,$(findstring Linux,$(TARGET)))
 #        $(info WARNING LEVEL: Host)
 		FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_HOST)

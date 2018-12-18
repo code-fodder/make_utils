@@ -66,7 +66,7 @@ FLAGS_SUB_MAKEFILE = $(FLAGS_VERBOSE) $(FLAGS_ANALYSE)
 ### Analysis tools ###
 
 # Set the analyse flag to false if this is thirdparty code
-ifneq (,$(findstring true,$(FLAGS_THIRD_PARTY)))
+ifneq (,$(findstring true,$(FLAGS_DONT_ANALYSE)))
   FLAGS_ANALYSE =
 endif
 
