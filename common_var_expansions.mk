@@ -30,14 +30,26 @@ OUTPUT_DIRS = \
 	$(addprefix $(DEP_DIR)/,$(SOURCE_DIRS))
 
 # Create the library linker options for the linker (-L<path> and -l<lib>)
-LIBRARY_LINK_FILES_TMP = $(notdir $(LIB_DEPS))
+# First add the super repo prefix if it exists
+ifdef SUPER_REPO_PATH
+  LIB_DEPS_TMP = $(addprefix $(realpath $(SUPER_REPO_PATH))/,$(LIB_DEPS))
+else
+  LIB_DEPS_TMP = $(LIB_DEPS)
+endif
+LIBRARY_LINK_FILES_TMP = $(notdir $(LIB_DEPS_TMP))
 LIB_LINK_FLAGS = \
-	$(addprefix -L,$(dir $(LIB_DEPS))) \
+	$(addprefix -L,$(dir $(LIB_DEPS_TMP))) \
 	$(addprefix -l,$(basename $(LIBRARY_LINK_FILES_TMP:lib%=%))) \
 	$(STANDARD_LIBS)
 
+# Add the super repo prefix if it exists
+ifdef SUPER_REPO_PATH
+  DEP_MAKE_DIRS_TMP := $(DEP_MAKE_DIRS)
+  DEP_MAKE_DIRS = $(addprefix $(realpath $(SUPER_REPO_PATH))/,$(DEP_MAKE_DIRS_TMP))
+endif
+
 # This contains the full paths required to link to the libraries
-LD_LIBRARY_PATH_VAL = $(subst $(eval) ,:,$(realpath $(dir $(LIB_DEPS))))
+LD_LIBRARY_PATH_VAL = $(subst $(eval) ,:,$(realpath $(dir $(LIB_DEPS_TMP))))
 
 # Clean items will clean all the items for one specific target - e.g. running "make target_x64Linux release clean" will just clean the file for 
 # the x86Linux release build

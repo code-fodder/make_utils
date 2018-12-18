@@ -58,6 +58,10 @@ CXX_STD = -std=c++11
 MAKE_DIR = mkdir -p
 RM = rm -rf
 
+### Super Repo Support ###
+# If this is set then the project should expect to find DEP_MAKE_DIRS and LIB_DEPS with the prefix of SUPER_REPO_PATH.
+SUPER_REPO_PATH =
+
 ### Inputs ###
 # Source directories
 SOURCE_DIRS = .
