@@ -88,6 +88,9 @@ CPPCHECK_INC_PATHS = \
 	$(addprefix -I,$(INC_DIRS)) \
 	--config-exclude=dds
 
+# Always suppress anything in the system includes list
+CPPCHECK_FILTERS += $(SYS_INC_DIRS)
+
 # Put together the cpp check command line
 CPPCHECK_CMD_LINE = $(CPPCHECK) $(CPPCHECK_INC_PATHS) $(CPPCHECK_FLAGS) $(CPPCHECK_SUPRESSIONS) $(CPPCHECK_FORMAT) $(RULE_DEPENDENCY)
 
@@ -124,6 +127,8 @@ endif
 # If analyse is set true then use gcov flags
 ifneq (,$(findstring analyse,$(FLAGS_ANALYSE)))
   # set these IF using gcov
+  # Always suppress anything in the system includes list
+  GCOV_FILTERS += $(SYS_INC_DIRS)
   # Use -fprofile-arcs generates .gcno at compile time, -ftest-coverage generates run-time output in .gcda files
   GCOV_FLAGS = -fprofile-arcs -ftest-coverage
   # Directory extension for using gcov (i.e. where the objects go)
