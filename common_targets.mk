@@ -12,7 +12,7 @@ SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 # Filter out the non-targets - these are special build modifiers
 # Sometimes the EXTRA_MAKE_GOALS will contain the build/clean target
 # depending on the order of the parameters
-EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose analyse,$(SECONDARY_PARAMS))
+EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose analyse target_x86Linux target_x64Linux,$(SECONDARY_PARAMS))
 
 # Export all variables that are setup here - saves individually exporting variables
 .EXPORT_ALL_VARIABLES:
@@ -35,7 +35,32 @@ FLAGS_ANALYSE =
 # in a rule in this file, but we pass those variables on to the makefile.mk with the print goal - thus printing
 # out the variables for the iMX8EVK target and not just the default one.
 $(eval $(SECONDARY_PARAMS):;@:)
-# Now check if the secondary parameters contains release, otherwise its a debug build
+
+# Linux x86 c++ compiler
+ifneq (,$(findstring target_x86Linux,$(ALL_PARAMS)))
+  TARGET := x86Linux
+  CC := gcc
+  CXX := g++
+  RANLIB := ranlib
+  AR := ar
+  PATH := $(PATH)
+  FLAGS_TARGET := -m32
+  MAKE_GOALS += 
+endif
+
+# Linux x64 c++ compiler
+ifneq (,$(findstring target_x64Linux,$(ALL_PARAMS)))
+  TARGET := x64Linux
+  CC := gcc
+  CXX := g++
+  RANLIB := ranlib
+  AR := ar
+  PATH := $(PATH)
+  FLAGS_TARGET := -m64
+  MAKE_GOALS += 
+endif
+
+# Check if its a release build
 ifneq (,$(findstring release,$(ALL_PARAMS)))
   BUILD_TYPE = release
   BUILD_SUFFIX =
@@ -69,12 +94,15 @@ ifneq (,$(findstring test,$(ALL_PARAMS)))
 endif
 
 ### THE MAIN RULE ###
+# Set this as the default rule
+.DEFAULT_GOAL = _run_make
 .PHONY: _run_make
 _run_make:
 	@for mkfile in $(makefile_list) ; do \
 		if [[ "$(FLAGS_VERBOSE)" != "" ]] ; then \
 			$(ECHO) "$(COLOUR_MAK)$$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
 		fi; \
+		$(RM) .build_prerequisites; \
 		$(MAKE) -f $$mkfile $(MAKE_GOALS) $(EXTRA_MAKE_GOALS) PATH="$(PATH)" $(SILENT_MAKE); \
 		if [[ $$? -ne 0 ]] ; then \
 			$(ECHO) "$(COLOUR_ERR)$$mkfile - failed$(COLOUR_RST)"; \
@@ -181,28 +209,28 @@ analyse: _run_make
 
 # Linux x86 c++ compiler
 .PHONY: target_x86Linux
-target_x86Linux: TARGET := x86Linux
-target_x86Linux: CC := gcc
-target_x86Linux: CXX := g++
-target_x86Linux: RANLIB := ranlib
-target_x86Linux: AR := ar
-target_x86Linux: PATH := $(PATH)
-target_x86Linux: FLAGS_TARGET := -m32
-target_x86Linux: MAKE_GOALS += 
-target_x86Linux: $(BUILD_TYPE)
+#target_x86Linux: TARGET := x86Linux
+#target_x86Linux: CC := gcc
+#target_x86Linux: CXX := g++
+#target_x86Linux: RANLIB := ranlib
+#target_x86Linux: AR := ar
+#target_x86Linux: PATH := $(PATH)
+#target_x86Linux: FLAGS_TARGET := -m32
+#target_x86Linux: MAKE_GOALS += 
+#target_x86Linux: $(BUILD_TYPE)
 target_x86Linux: _run_make
 
 # Linux x64 c++ compiler
 .PHONY: target_x64Linux
-target_x64Linux: TARGET := x64Linux
-target_x64Linux: CC := gcc
-target_x64Linux: CXX := g++
-target_x64Linux: RANLIB := ranlib
-target_x64Linux: AR := ar
-target_x64Linux: PATH := $(PATH)
-target_x64Linux: FLAGS_TARGET := -m64
-target_x64Linux: MAKE_GOALS += 
-target_x64Linux: $(BUILD_TYPE)
+#target_x64Linux: TARGET := x64Linux
+#target_x64Linux: CC := gcc
+#target_x64Linux: CXX := g++
+#target_x64Linux: RANLIB := ranlib
+#target_x64Linux: AR := ar
+#target_x64Linux: PATH := $(PATH)
+#target_x64Linux: FLAGS_TARGET := -m64
+#target_x64Linux: MAKE_GOALS += 
+#target_x64Linux: $(BUILD_TYPE)
 target_x64Linux: _run_make
 
 ## target_iMX8EVK	: build the applications for the armv8 NXP i.MX8 EVK dev board

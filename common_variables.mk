@@ -19,6 +19,9 @@ LD_LIBRARY_PATH_VAL =
 # Note each line must end with a semi-colon ';'.
 POST_BUILD_TASKS =
 
+# Same as post build, but occurs before the build starts
+PRE_BUILD_TASKS =
+
 # This is really just a reminder. Can use these variables as required.
 # Rule format is  "$@: $<"
 RULE_TARGET = $@
