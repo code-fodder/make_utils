@@ -42,6 +42,8 @@ LIB_LINK_FLAGS = \
 	$(addprefix -l,$(basename $(LIBRARY_LINK_FILES_TMP:lib%=%))) \
 	$(STANDARD_LIBS)
 
+LINK_CMD = $(CC) $(LFLAGS) $(OBJECTS) -o $(OUTPUT_DIR)/$(OUTPUT_FILE) $(LIB_LINK_FLAGS)
+
 # Add the super repo prefix if it exists
 ifdef SUPER_REPO_PATH
   DEP_MAKE_DIRS_TMP := $(DEP_MAKE_DIRS)
