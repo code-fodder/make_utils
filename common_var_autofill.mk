@@ -62,7 +62,8 @@ CLEAN_ITEMS = $(BIN_DIR)/*$(TARGET)$(BUILD_SUFFIX)* \
 			  $(DEP_DIR) \
 			  $(addprefix $(DEP_DIR)/,$(SOURCE_DIRS)) \
 			  coverage.xml \
-			  memcheck.xml memcheck.out
+			  memcheck.xml memcheck.out \
+			  .build_prerequisites
 
 # Derive this from the CLEAN_ITEMS by taking the base dir of each since we are going to remove the entire dir:
 # $(subst /, ,$(p)) : substitutes all / by space in the expansion of make variable p

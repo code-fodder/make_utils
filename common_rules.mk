@@ -21,10 +21,11 @@ POSTCOMPILE = @mv -f $(DEP_DIR)/$*.Td $(DEP_DIR)/$*.d && touch $(RULE_TARGET)
 # Note we need to export the variables that are needed when we recursivly call make
 # on the output file target
 #export OUTPUT_DIR OUTPUT_FILE CC CXX LFLAGS OBJECTS LIB_DEPS - just export them all!
+
 .EXPORT_ALL_VARIABLES:
 .PHONY: build
 build: DEP_MAKE_GOAL = build
-build: build_header $(OUTPUT_DIRS) $(DEP_MAKE_DIRS) $(OBJECTS)
+build: .build_prerequisites $(DEP_MAKE_DIRS) $(OBJECTS)
 build:
 	@$(MAKE) -f make_utils/common_rules.mk $(OUTPUT_DIR)/$(OUTPUT_FILE) $(SILENT_MAKE)
 	@if [[ "$(POST_BUILD_TASKS)" != "" ]] ; then \
@@ -32,14 +33,20 @@ build:
 		$(POST_BUILD_TASKS) \
 	fi ;
 
-.PHONY: build_header
-build_header:
-	@$(ECHO) "$(COLOUR_ACT)building $(GET_CURDIR_BASENAME)$(GET_MAKE_SUFFIX) ($(TARGET) $(BUILD_TYPE)): $(COLOUR_RST) $(COLOUR_DEP)[$(DEP_MAKE_DIRS)]$(COLOUR_RST)"
+.build_prerequisites: | $(OUTPUT_DIRS)
+	@$(ECHO) 1 > .build_prerequisites
+	@if [[ "$(DEP_MAKE_GOAL)" == "build" ]] ; then \
+		if [[ "$(PRE_BUILD_TASKS)" != "" ]] ; then \
+			$(ECHO) "$(COLOUR_ACT)processing $(GET_CURDIR_BASENAME)$(GET_MAKE_SUFFIX) pre build tasks$(COLOUR_RST)" ; \
+			$(PRE_BUILD_TASKS) \
+		fi ; \
+		$(ECHO) "$(COLOUR_ACT)building $(GET_CURDIR_BASENAME)$(GET_MAKE_SUFFIX) ($(TARGET) $(BUILD_TYPE)): $(COLOUR_RST) $(COLOUR_DEP)[$(DEP_MAKE_DIRS)]$(COLOUR_RST)"; \
+	fi ;
 
 ###### External Dependency Rules ######
 # Dependency makefile directories rule (builds projects in other directories)
 .PHONY: $(DEP_MAKE_DIRS)
-$(DEP_MAKE_DIRS):
+$(DEP_MAKE_DIRS): | .build_prerequisites
 	@if [ "$(FLAGS_VERBOSE)" != "" ] ; then \
 		$(ECHO) "$(COLOUR_DEP)processing dependency: '$(RULE_TARGET)'$(COLOUR_RST)"; \
 	fi;
@@ -48,7 +55,7 @@ $(DEP_MAKE_DIRS):
 		$(ECHO) "$(COLOUR_MAK)$(GET_ROOT_MAKEFILE) $(MAKECMDGOALS) ...continued ($(TARGET) $(BUILD_TYPE))$(COLOUR_RST)"; \
 	fi;
 
-###### The target rule ######
+###### The target rule - Linker ######
 # Note: the dependencies should already be built - they are only here to trigger the rule if they have changed
 $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OBJECTS) $(LIB_DEPS)
 	@$(ECHO) "$(COLOUR_ACT)linking: $(PROJECT_NAME)$(COLOUR_RST)"
@@ -62,19 +69,19 @@ $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OBJECTS) $(LIB_DEPS)
 
 ###### Compile Rules ######
 # Compile .cpp files
-$(OBJECT_DIR)/%.o: %.cpp
+$(OBJECT_DIR)/%.o: %.cpp | .build_prerequisites
 	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)	
 	-@$(POSTCOMPILE)
 # Compile .cxx files
-$(OBJECT_DIR)/%.o: %.cxx
+$(OBJECT_DIR)/%.o: %.cxx | .build_prerequisites
 	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	-@$(POSTCOMPILE)
 # Compile .c files
-$(OBJECT_DIR)/%.o: %.c
+$(OBJECT_DIR)/%.o: %.c | .build_prerequisites
 	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
 	$(CC) $(FLAGS_C_WARNINGS) $(CFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
@@ -110,7 +117,10 @@ cleanall:
 .PHONY: create_dirs
 create_dirs: $(OUTPUT_DIRS)
 $(OUTPUT_DIRS):
-	@$(MAKE_DIR) $(RULE_TARGET)
+	@if [[ "$(DEP_MAKE_GOAL)" == "build" ]] ; then \
+		$(ECHO) Creating Dir: $(RULE_TARGET); \
+		$(MAKE_DIR) $(RULE_TARGET); \
+	fi ;
 
 # Print all the variables
 VARS := $(sort $(filter-out $(VARS_OLD) VARS_OLD,$(.VARIABLES)))
