@@ -18,13 +18,13 @@ EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose analyse tar
 .EXPORT_ALL_VARIABLES:
 
 # defaults - Note: these parameters are exported so that they are passed down to the sub makefiles
-TARGET = x86Linux
+TARGET = x64Linux
 BUILD_TYPE = debug
 CC = g++
 CXX = g++
 RANLIB = ranlib
 AR = ar
-FLAGS_TARGET = -m32
+FLAGS_TARGET = -m64
 BUILD_SUFFIX = d
 FLAGS_VERBOSE =
 FLAGS_SILENT =
