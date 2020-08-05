@@ -45,7 +45,7 @@ ifneq (,$(findstring target_x86Linux,$(ALL_PARAMS)))
   AR := ar
   PATH := $(PATH)
   FLAGS_TARGET := -m32
-  MAKE_GOALS += 
+  MAKE_GOALS +=
 endif
 
 # Linux x64 c++ compiler
@@ -57,7 +57,7 @@ ifneq (,$(findstring target_x64Linux,$(ALL_PARAMS)))
   AR := ar
   PATH := $(PATH)
   FLAGS_TARGET := -m64
-  MAKE_GOALS += 
+  MAKE_GOALS +=
 endif
 
 # Check if its a release build
@@ -67,7 +67,7 @@ ifneq (,$(findstring release,$(ALL_PARAMS)))
 endif
 
 # If verbose is specified then this just prints a little bit of extra debug info
-# If vverbose is specified then print all the compile/link commands as well. Note that 
+# If vverbose is specified then print all the compile/link commands as well. Note that
 # --no-print-directory is still specified because it is deemed unuseful (we have other
 # debug that shows the precise makefile being called)
 SILENT_MAKE = -s --no-print-directory
@@ -173,7 +173,7 @@ run_gcov_cmd: _run_make
 ############### Build Modifiers ################
 
 # IMPORTANT NOTE
-# These are meant to be called as secondary build goals since they only modify the 
+# These are meant to be called as secondary build goals since they only modify the
 # flags that are passed to the makefile.mk. However if they are the first parameter
 # They become THE rule, so we add a rule here to do the default build, but also
 # it does the tab completion
@@ -188,7 +188,7 @@ release: _run_make
 debug: FLAGS_TARGET += -g
 debug: _run_make
 
-# verbose 
+# verbose
 .PHONY: verbose
 verbose: _run_make
 
@@ -196,7 +196,7 @@ verbose: _run_make
 .PHONY: vverbose
 vverbose: _run_make
 
-# analyse 
+# analyse
 .PHONY: analyse
 analyse: _run_make
 
@@ -216,7 +216,7 @@ analyse: _run_make
 #target_x86Linux: AR := ar
 #target_x86Linux: PATH := $(PATH)
 #target_x86Linux: FLAGS_TARGET := -m32
-#target_x86Linux: MAKE_GOALS += 
+#target_x86Linux: MAKE_GOALS +=
 #target_x86Linux: $(BUILD_TYPE)
 target_x86Linux: _run_make
 
@@ -229,7 +229,7 @@ target_x86Linux: _run_make
 #target_x64Linux: AR := ar
 #target_x64Linux: PATH := $(PATH)
 #target_x64Linux: FLAGS_TARGET := -m64
-#target_x64Linux: MAKE_GOALS += 
+#target_x64Linux: MAKE_GOALS +=
 #target_x64Linux: $(BUILD_TYPE)
 target_x64Linux: _run_make
 
@@ -242,7 +242,7 @@ target_iMX8EVK: RANLIB := aarch64-poky-linux-gnueabi-ranlib
 target_iMX8EVK: AR := aarch64-poky-linux-gnueabi-ar
 target_iMX8EVK: PATH := /opt/fsl-imx-x11/4.9.51-mx8-beta/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux:$(PATH)
 target_iMX8EVK: FLAGS_TARGET := -march=armv8-a -mtune=cortex-a53 --sysroot=/opt/fsl-imx-x11/4.9.51-mx8-beta/sysroots/aarch64-poky-linux
-target_iMX8EVK: MAKE_GOALS += 
+target_iMX8EVK: MAKE_GOALS +=
 target_iMX8EVK: $(BUILD_TYPE)
 target_iMX8EVK: _run_make
 
@@ -255,7 +255,7 @@ target_6GHzRx: RANLIB := arm-poky-linux-gnueabi-ranlib
 target_6GHzRx: AR := arm-poky-linux-gnueabi-ar
 target_6GHzRx: PATH := /opt/fsl-imx-x11/4.1.15-1.1.1/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi:$(PATH)
 target_6GHzRx: FLAGS_TARGET := -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a9 --sysroot=/opt/fsl-imx-x11/4.1.15-1.1.1/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi
-target_6GHzRx: MAKE_GOALS += 
+target_6GHzRx: MAKE_GOALS +=
 target_6GHzRx: $(BUILD_TYPE)
 target_6GHzRx: _run_make
 
@@ -268,6 +268,19 @@ target_6GHzTx: RANLIB := arm-poky-linux-gnueabi-ranlib
 target_6GHzTx: AR := arm-poky-linux-gnueabi-ar
 target_6GHzTx: PATH := /opt/trl-imx-6GTcvr/4.1.15-1.2.0/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi:$(PATH)
 target_6GHzTx: FLAGS_TARGET := -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a9 --sysroot=/opt/trl-imx-6GTcvr/4.1.15-1.2.0/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi
-target_6GHzTx: MAKE_GOALS += 
+target_6GHzTx: MAKE_GOALS +=
 target_6GHzTx: $(BUILD_TYPE)
 target_6GHzTx: _run_make
+
+## target_bbb  : Beaglebone black - installed in /usr/bin so no path is setup
+.PHONY: target_bbb
+target_bbb: TARGET := bbb
+target_bbb: CC := arm-linux-gnueabihf-gcc
+target_bbb: CXX := arm-linux-gnueabihf-g++
+target_bbb: RANLIB := arm-linux-gnueabihf-ranlib
+target_bbb: AR := arm-linux-gnueabihf-ar
+target_bbb: PATH := $(PATH)
+target_bbb: FLAGS_TARGET :=
+target_bbb: MAKE_GOALS +=
+target_bbb: $(BUILD_TYPE)
+target_bbb: _run_make
