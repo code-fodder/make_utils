@@ -284,3 +284,16 @@ target_bbb: FLAGS_TARGET :=
 target_bbb: MAKE_GOALS +=
 target_bbb: $(BUILD_TYPE)
 target_bbb: _run_make
+
+## target_arduino  : arduino - installed in /usr/bin so no path is setup
+.PHONY: target_arduino
+target_arduino: TARGET := arduino
+target_arduino: CC := arm-none-eabi-gcc
+target_arduino: CXX := arm-none-eabi-g++
+target_arduino: RANLIB := arm-none-eabi-ranlib
+target_arduino: AR := arm-none-eabi-ar
+target_arduino: PATH := $(PATH)
+target_arduino: FLAGS_TARGET := --specs=nosys.specs -mthumb -mcpu=cortex-m3 -mlittle-endian
+target_arduino: MAKE_GOALS +=
+target_arduino: $(BUILD_TYPE)
+target_arduino: _run_make
