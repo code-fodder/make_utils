@@ -2,13 +2,13 @@ include make_utils/globals.mk
 include make_utils/common_colours.mk
 
 # For printing. This takes a copy of all the environment variables. We take
-# this copy before we set any variables so that we can filter those variables 
+# this copy before we set any variables so that we can filter those variables
 # out later and just print the new variables we have set.
 VARS_OLD := $(.VARIABLES)
 VARS_OLD := $(filter-out TARGET CC CXX RANLIB AR PATH FLAGS_TARGET LIB_DEPS BUILD_SUFFIX,$(VARS_OLD))
 
 # This can be useful for setting the LD LIBRARY PATH easily
-LD_LIBRARY_PATH_VAL = 
+LD_LIBRARY_PATH_VAL =
 
 # Post build tasks - this is meant to contain some simple bash instructions like copying files required
 # to run the application. Its not really intended for complicated scripts becuase:
@@ -55,7 +55,7 @@ LFLAGS = $(FLAGS_TARGET)
 DEFINES =
 
 ### C/C++ standards ###
-CXX_STD = -std=c++11
+CXX_STD = -std=c++17
 
 ### Commands ###
 MAKE_DIR = mkdir -p
