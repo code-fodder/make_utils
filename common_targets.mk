@@ -92,6 +92,12 @@ endif
 clang_tidy: FLAGS_ANALYSE += clang_tidy
 clang_tidy: _run_make
 
+# Clang tidy
+.PHONY: clang_tidy_fix
+clang_tidy_fix: FLAGS_ANALYSE += clang_tidy_fix
+clang_tidy_fix: _run_make
+
+
 # Set the default target if not already set - this allows the makefile to overule it
 .DEFAULT_GOAL := target_x86Linux
 

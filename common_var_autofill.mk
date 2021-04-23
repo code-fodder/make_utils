@@ -87,17 +87,21 @@ endif
 
 ### CLANG TIDY ###
 ifneq (,$(findstring clang_tidy,$(FLAGS_ANALYSE)))
-	CXX = $(CLANG_COMPILER)
-	CC = $(CLANG_COMPILER)
-	CXXFLAGS += -MJ $(notdir $(RULE_TARGET).json)
-	PRE_BUILD_TASKS += touch $(SOURCES) ;
-	# All checks by default
-	CLANG_TIDY_CFG = -checks=* -header-filter=.*
-	CLANG_TIDY_CMD = $(CLANG_TIDY) $(CLANG_TIDY_CFG) $(SOURCES)
-	CLANG_TIDY_FULL_CMD = \
-		sed -e '1s/^/[\'$$'\n''/' -e '$$s/,$$/\'$$'\n'']/' *.o.json > $(CLANG_TIDY_CONFIG_FILE) ; \
-		$(CLANG_TIDY_CMD) ; \
-		rm *.o.json $(CLANG_TIDY_CONFIG_FILE) ;
+  CXX = $(CLANG_COMPILER)
+  CC = $(CLANG_COMPILER)
+  CXXFLAGS += -MJ $(notdir $(RULE_TARGET).json)
+  PRE_BUILD_TASKS += touch $(SOURCES) ;
+  # All checks by default
+  CLANG_TIDY_CFG = -checks=* -header-filter=.*
+  # Add the fix option if required
+  ifneq (,$(findstring clang_tidy_fix,$(FLAGS_ANALYSE)))
+    CLANG_TIDY_CFG += -fix
+  endif
+  CLANG_TIDY_CMD = $(CLANG_TIDY) $(CLANG_TIDY_CFG) $(SOURCES)
+  CLANG_TIDY_FULL_CMD = \
+    sed -e '1s/^/[\'$$'\n''/' -e '$$s/,$$/\'$$'\n'']/' *.o.json > $(CLANG_TIDY_CONFIG_FILE) ; \
+    $(CLANG_TIDY_CMD) ; \
+    rm *.o.json $(CLANG_TIDY_CONFIG_FILE) ;
 endif
 
 ### CCP CHECK ###
