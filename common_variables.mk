@@ -53,6 +53,9 @@ CFLAGS = $(FLAGS_TARGET)
 CXXFLAGS = $(FLAGS_TARGET)
 LFLAGS = $(FLAGS_TARGET)
 DEFINES =
+# The gcc / clang option for processing a source file. Default is to compile
+COMPILE_PROCESSING_OPTION = -c
+COMPILE_OUTPUT_LOCATION = $(RULE_TARGET)
 
 ### C/C++ standards ###
 CXX_STD = -std=c++17
@@ -97,7 +100,7 @@ PROJECT_NAME = out
 # Full path of the project
 PROJET_DIR = $(CURDIR)
 # Location where the object files are put
-OBJECT_DIR = obj/$(TARGET)_$(BUILD_TYPE)$(GCOV_OBJ_DIR)
+OBJECT_DIR = obj/$(TARGET)_$(BUILD_TYPE)$(GCOV_OBJ_DIR)$(CLANG_TIDY_OBJ_DIR)
 # List of object files
 OBJECTS =
 # Location where the object deps (obj.d) files are put
@@ -141,6 +144,7 @@ FLAGS_DONT_ANALYSE = false
 ### CLANG_TIDY ###
 # binary command
 CLANG_TIDY = clang-tidy
+CLANG_TIDY_OBJ_DIR =
 CLANG_COMPILER = clang
 CLANG_TIDY_CONFIG_FILE = compile_commands.json
 CLANG_TIDY_CFG =

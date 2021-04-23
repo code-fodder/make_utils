@@ -89,8 +89,13 @@ endif
 ifneq (,$(findstring clang_tidy,$(FLAGS_ANALYSE)))
   CXX = $(CLANG_COMPILER)
   CC = $(CLANG_COMPILER)
+  # Don't compile the files - just run the pre-processing only
+  COMPILE_PROCESSING_OPTION = -E
+  COMPILE_OUTPUT_LOCATION = /dev/null
+  # Don't link
+  LINK_CMD =
+  CLANG_TIDY_OBJ_DIR = /ctidy
   CXXFLAGS += -MJ $(notdir $(RULE_TARGET).json)
-  PRE_BUILD_TASKS += touch $(SOURCES) ;
   # All checks by default
   CLANG_TIDY_CFG = -checks=* -header-filter=.*
   # Add the fix option if required
@@ -101,7 +106,7 @@ ifneq (,$(findstring clang_tidy,$(FLAGS_ANALYSE)))
   CLANG_TIDY_FULL_CMD = \
     sed -e '1s/^/[\'$$'\n''/' -e '$$s/,$$/\'$$'\n'']/' *.o.json > $(CLANG_TIDY_CONFIG_FILE) ; \
     $(CLANG_TIDY_CMD) ; \
-    rm *.o.json $(CLANG_TIDY_CONFIG_FILE) ;
+    $(RM) *.o.json $(CLANG_TIDY_CONFIG_FILE) $(OBJECTS);
 endif
 
 ### CCP CHECK ###
