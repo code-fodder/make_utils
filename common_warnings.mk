@@ -63,18 +63,22 @@ FLAGS_WARNINGS_DISABLED   = -w
 ########################################################
 # Setup the warning level based on target              #
 ########################################################
-ifneq (,$(findstring false,$(FLAGS_DONT_ANALYSE)))
-	ifneq (,$(findstring Linux,$(TARGET)))
-#        $(info WARNING LEVEL: Host)
-		FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_HOST)
-		FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_C_HOST)
-	else
-#        $(info WARNING LEVEL: Target)
-		FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_TARGET)
-		FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_C_TARGET)
-	endif
+ifneq (,$(findstring clang_tidy,$(FLAGS_ANALYSE)))
+	# Dont add warning flags
 else
-#    $(info WARNING LEVEL: Disabled)
-	FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_DISABLED)
-	FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_DISABLED)
+	ifneq (,$(findstring false,$(FLAGS_DONT_ANALYSE)))
+		ifneq (,$(findstring Linux,$(TARGET)))
+			# $(info WARNING LEVEL: Host)
+			FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_HOST)
+			FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_C_HOST)
+		else
+			# $(info WARNING LEVEL: Target)
+			FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_CPP_TARGET)
+			FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_C_TARGET)
+		endif
+	else
+		# $(info WARNING LEVEL: Disabled)
+		FLAGS_CPP_WARNINGS = $(FLAGS_WARNINGS_DISABLED)
+		FLAGS_C_WARNINGS   = $(FLAGS_WARNINGS_DISABLED)
+	endif
 endif

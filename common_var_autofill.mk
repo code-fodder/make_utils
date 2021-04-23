@@ -53,7 +53,7 @@ endif
 # This contains the full paths required to link to the libraries
 LD_LIBRARY_PATH_VAL = $(subst $(eval) ,:,$(realpath $(dir $(LIB_DEPS_TMP))))
 
-# Clean items will clean all the items for one specific target - e.g. running "make target_x64Linux release clean" will just clean the file for 
+# Clean items will clean all the items for one specific target - e.g. running "make target_x64Linux release clean" will just clean the file for
 # the x86Linux release build
 CLEAN_ITEMS = $(BIN_DIR)/*$(TARGET)$(BUILD_SUFFIX)* \
               $(LIB_DIR)/*$(TARGET)$(BUILD_SUFFIX)* \
@@ -85,6 +85,21 @@ ifneq (,$(findstring true,$(FLAGS_DONT_ANALYSE)))
   FLAGS_ANALYSE =
 endif
 
+### CLANG TIDY ###
+ifneq (,$(findstring clang_tidy,$(FLAGS_ANALYSE)))
+	CXX = $(CLANG_COMPILER)
+	CC = $(CLANG_COMPILER)
+	CXXFLAGS += -MJ $(notdir $(RULE_TARGET).json)
+	PRE_BUILD_TASKS += touch $(SOURCES) ;
+	# All checks by default
+	CLANG_TIDY_CFG = -checks=* -header-filter=.*
+	CLANG_TIDY_CMD = $(CLANG_TIDY) $(CLANG_TIDY_CFG) $(SOURCES)
+	CLANG_TIDY_FULL_CMD = \
+		sed -e '1s/^/[\'$$'\n''/' -e '$$s/,$$/\'$$'\n'']/' *.o.json > $(CLANG_TIDY_CONFIG_FILE) ; \
+		$(CLANG_TIDY_CMD) ; \
+		rm *.o.json $(CLANG_TIDY_CONFIG_FILE) ;
+endif
+
 ### CCP CHECK ###
 # Generate includ dirs list
 CPPCHECK_INC_PATHS = \
@@ -102,7 +117,7 @@ ifneq (,$(findstring analyse,$(FLAGS_ANALYSE)))
 # Create the CPPCHECK command. This command works by:
 # 1. Check if the words in the filter list match the current dependency (e.g. is 'autogen' in the object file path?).
 #    If a match is found then don't cpp check this file
-# 2. If we are running cppcheck then run the command in a bash subshell like this: $(...cmd...), however we need to 
+# 2. If we are running cppcheck then run the command in a bash subshell like this: $(...cmd...), however we need to
 #    escape make '$' so we use $$(...) (same for bash variables: $$bash_var).
 # 3. When running the cpp check command it is the stderr we want. So route stderr to stdout (2>&1), then route stdout
 #    to null (... > /dev/null).

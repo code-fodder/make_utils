@@ -12,16 +12,20 @@ SECONDARY_PARAMS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 # Filter out the non-targets - these are special build modifiers
 # Sometimes the EXTRA_MAKE_GOALS will contain the build/clean target
 # depending on the order of the parameters
-EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose analyse target_x86Linux target_x64Linux,$(SECONDARY_PARAMS))
+EXTRA_MAKE_GOALS := $(filter-out debug release test verbose vverbose analyse clang_tidy target_x86Linux target_x64Linux,$(SECONDARY_PARAMS))
 
 # Export all variables that are setup here - saves individually exporting variables
 .EXPORT_ALL_VARIABLES:
 
+#CPP_COMPILER = clang
+C_COMPILER = gcc
+CPP_COMPILER = g++
+
 # defaults - Note: these parameters are exported so that they are passed down to the sub makefiles
 TARGET = x64Linux
 BUILD_TYPE = debug
-CC = g++
-CXX = g++
+CC = $(C_COMPILER)
+CXX = $(CPP_COMPILER)
 RANLIB = ranlib
 AR = ar
 FLAGS_TARGET = -m64
@@ -39,8 +43,8 @@ $(eval $(SECONDARY_PARAMS):;@:)
 # Linux x86 c++ compiler
 ifneq (,$(findstring target_x86Linux,$(ALL_PARAMS)))
   TARGET := x86Linux
-  CC := gcc
-  CXX := g++
+  CC := $(C_COMPILER)
+  CXX := $(CPP_COMPILER)
   RANLIB := ranlib
   AR := ar
   PATH := $(PATH)
@@ -51,8 +55,8 @@ endif
 # Linux x64 c++ compiler
 ifneq (,$(findstring target_x64Linux,$(ALL_PARAMS)))
   TARGET := x64Linux
-  CC := gcc
-  CXX := g++
+  CC := $(C_COMPILER)
+  CXX := $(CPP_COMPILER)
   RANLIB := ranlib
   AR := ar
   PATH := $(PATH)
@@ -82,6 +86,11 @@ endif
 ifneq (,$(findstring analyse,$(ALL_PARAMS)))
   FLAGS_ANALYSE = analyse
 endif
+
+# Clang tidy
+.PHONY: clang_tidy
+clang_tidy: FLAGS_ANALYSE += clang_tidy
+clang_tidy: _run_make
 
 # Set the default target if not already set - this allows the makefile to overule it
 .DEFAULT_GOAL := target_x86Linux

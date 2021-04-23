@@ -28,6 +28,10 @@ build: DEP_MAKE_GOAL = build
 build: .build_prerequisites $(DEP_MAKE_DIRS) $(OBJECTS)
 build:
 	@$(MAKE) -f make_utils/common_rules.mk $(OUTPUT_DIR)/$(OUTPUT_FILE) $(SILENT_MAKE)
+	@if [[ "$(CLANG_TIDY_CMD)" != "" ]] ; then \
+		$(ECHO) "$(COLOUR_ACT)clang tidy: $(COLOUR_RST)$(CLANG_TIDY_CMD)" ; \
+		$(CLANG_TIDY_FULL_CMD) \
+	fi ;
 	@if [[ "$(POST_BUILD_TASKS)" != "" ]] ; then \
 		$(ECHO) "$(COLOUR_ACT)processing $(GET_CURDIR_BASENAME)$(GET_MAKE_SUFFIX) post build tasks$(COLOUR_RST)" ; \
 		$(POST_BUILD_TASKS) \
@@ -72,7 +76,7 @@ $(OUTPUT_DIR)/$(OUTPUT_FILE): $(OBJECTS) $(LIB_DEPS)
 $(OBJECT_DIR)/%.o: %.cpp | .build_prerequisites
 	$(CPPCHECK_BASH_CMD)
 	@$(ECHO) "$(COLOUR_ACT)compiling: $(RULE_DEPENDENCY)$(COLOUR_RST)"
-	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)	
+	$(CXX) $(FLAGS_CPP_WARNINGS) $(CXXFLAGS) $(DEFINES) $(DEP_FLAGS) -c $(RULE_DEPENDENCY) -o $(RULE_TARGET)
 	-@$(POSTCOMPILE)
 # Compile .cxx files
 $(OBJECT_DIR)/%.o: %.cxx | .build_prerequisites

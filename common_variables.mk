@@ -138,6 +138,15 @@ FLAGS_WARNINGS_DISABLED =
 # Dont analyse flag - set to true if the project is 3rd party or test code so that warnings and other checks will not be applied
 FLAGS_DONT_ANALYSE = false
 
+### CLANG_TIDY ###
+# binary command
+CLANG_TIDY = clang-tidy
+CLANG_COMPILER = clang
+CLANG_TIDY_CONFIG_FILE = compile_commands.json
+CLANG_TIDY_CFG =
+CLANG_TIDY_CMD =
+CLANG_TIDY_FULL_CMD =
+
 ### cppcheck ###
 # cppcheck command
 CPPCHECK = cppcheck
